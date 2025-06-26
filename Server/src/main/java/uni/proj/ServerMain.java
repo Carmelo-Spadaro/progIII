@@ -1,6 +1,13 @@
+import uni.proj.ServerApplication;
 import uni.proj.model.Server;
 
-void main(String[] args) {
-    Server server = new Server(args);
-    server.start();
+import uni.proj.Config;
+
+void main() {
+    if(Config.NO_GUI) {
+        Server server = new Server();
+        server.startServer();
+    } else {
+        ServerApplication.launchApplication();
+    }
 }

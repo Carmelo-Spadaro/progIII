@@ -30,11 +30,15 @@ public abstract class Event {
         return type;
     }
 
+    public String getTimeString() {
+        return time.toString().substring(0, 23);
+    }
+
     @Override
     public String toString() {
         String typeCol = String.format("%-10s", type);
         String msgCol = String.format("%-38s", message);
-        String timeCol = time.toString().substring(0, 23);
+        String timeCol = getTimeString();
         return String.format("| %-10s | %-38s | %-26s |", typeCol, msgCol, timeCol);
     }
 }

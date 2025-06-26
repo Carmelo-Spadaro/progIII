@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="uni.proj.controller.ServerController"
+      spacing="10.0">
+    <padding>
+        <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+    </padding>
+
+    <!-- Scrollable Table -->
+    <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="typeColumn" text="Type" prefWidth="100"/>
+            <TableColumn fx:id="messageColumn" text="Message" prefWidth="300"/>
+            <TableColumn fx:id="timeColumn" text="Time" prefWidth="150"/>
+        </columns>
+    </TableView>
+
+    <!-- Bottom input -->
+    <HBox spacing="10">
+        <TextField fx:id="inputField" HBox.hgrow="ALWAYS" promptText="Scrivi un comando..."/>
+        <Button text="Invia" onAction="#onSend"/>
+    </HBox>
+</VBox>

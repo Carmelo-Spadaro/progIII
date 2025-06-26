@@ -1,14 +1,23 @@
 package uni.proj.model;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import uni.proj.events.Event;
+import uni.proj.model.Log;
 
 import static java.io.IO.*;
 
+
+@SuppressWarnings("preview")
 public class Logger {
 
     private boolean headerPrinted = false;
+    private final ObservableList<Log> logs;
 
-    public Logger() {}
+    public Logger() {
+        logs = FXCollections.observableArrayList();
+    }
+
 
     public void log(Event event) {
         if (!headerPrinted) {
@@ -16,15 +25,13 @@ public class Logger {
             headerPrinted = true;
         }
         println(event);
+        logs.add(new Log(event));
         printFooter();
-    }
-
-    public void reset() {
-        headerPrinted = false;
     }
 
     public void clear() {
         print("\033[H\033[2J"); // ANSI escape per pulire il terminale (non su tutti i sistemi)
+        logs.clear();
         System.out.flush();
     }
 
@@ -41,5 +48,9 @@ public class Logger {
     public void printFooter() {
         String bottom = "+------------+----------------------------------------+----------------------------+";
         println(bottom);
+    }
+
+    public ObservableList<Log> getLogs() {
+        return logs;
     }
 }
