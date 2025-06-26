@@ -24,6 +24,7 @@
     <!-- Bottom input -->
     <HBox spacing="10">
         <TextField fx:id="inputField" HBox.hgrow="ALWAYS" promptText="Scrivi un comando..."/>
+        <Button text="Help" onAction="#onHelp"/>
         <Button text="Invia" onAction="#onSend"/>
     </HBox>
 </VBox>

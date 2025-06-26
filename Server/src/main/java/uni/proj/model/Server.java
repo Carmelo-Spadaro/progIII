@@ -118,4 +118,8 @@ public class Server implements Runnable {
     public Logger getLogger() {
         return logger;
     }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
 }
