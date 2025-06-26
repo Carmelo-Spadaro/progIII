@@ -1,5 +1,4 @@
-import java.io.IO;
-
+@SuppressWarnings("preview")
 
 void main() {
     println("Hello world");
