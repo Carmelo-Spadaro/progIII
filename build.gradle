@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id 'application'
 }
 
 group = 'uni.proj'
@@ -16,7 +15,7 @@ dependencies {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += '--enable-preview'
+    options.compilerArgs += ['--enable-preview', '-Xlint:-preview']
 }
 
 tasks.withType(Test).configureEach {
@@ -26,8 +25,4 @@ tasks.withType(Test).configureEach {
 
 tasks.withType(JavaExec).configureEach {
     jvmArgs += '--enable-preview'
-}
-
-application {
-    mainClass = 'uni.proj.Main'
 }

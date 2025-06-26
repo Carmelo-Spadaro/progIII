@@ -1,11 +1,34 @@
 plugins {
     id 'java'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
+    implementation 'io.github.cdimascio:java-dotenv:5.2.2'
     // Dipendenze specifiche del modulo Server
     // ad esempio, se usa Client internamente:
     // implementation project(':Client')
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += ['--enable-preview', '-Xlint:-preview']
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs += '--enable-preview'
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += '--enable-preview'
+}
+
+application {
+    mainClass = 'ServerMain'
 }
 
 java {

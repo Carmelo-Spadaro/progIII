@@ -1,9 +1,29 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 dependencies {
-    // Dipendenze specifiche del Client
+    // Dipendenze specifiche del modulo Server
+    // ad esempio, se usa Client internamente:
+    // implementation project(':Client')
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += '--enable-preview'
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs += '--enable-preview'
+    useJUnitPlatform()
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += '--enable-preview'
+}
+
+application {
+    mainClass = 'uni.proj.ServerMain'
 }
 
 java {
