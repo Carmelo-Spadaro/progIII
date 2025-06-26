@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    // Dipendenze specifiche del modulo Server
+    // ad esempio, se usa Client internamente:
+    // implementation project(':Client')
+}
+
+java {
+    modularity.inferModulePath = true
+}

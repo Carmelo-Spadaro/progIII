@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'application' // 👈 serve per far funzionare `gradlew run`
+    id 'application'
 }
 
 group = 'uni.proj'

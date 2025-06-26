@@ -1,0 +1,11 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    // Dipendenze specifiche del Client
+}
+
+java {
+    modularity.inferModulePath = true
+}
