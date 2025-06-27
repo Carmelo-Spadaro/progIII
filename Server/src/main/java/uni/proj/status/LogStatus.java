@@ -1,14 +1,14 @@
-package uni.proj.events;
+package uni.proj.status;
 
 import java.time.Instant;
 
-public abstract class Event {
+public abstract class LogStatus {
 
     String message;
     private final Instant time;
     protected final String type;
 
-    public Event(String message) {
+    public LogStatus(String message) {
         this.message = message;
         this.time = Instant.now();
         this.type = this.getClass().getSimpleName();

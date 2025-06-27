@@ -2,14 +2,14 @@ package uni.proj.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import uni.proj.events.Event;
+import uni.proj.status.LogStatus;
 
 public class Log {
     private final StringProperty type;
     private final StringProperty message;
     private final StringProperty time;
 
-    public Log(Event e) {
+    public Log(LogStatus e) {
         type = new SimpleStringProperty(e.getType());
         message = new SimpleStringProperty(e.getMessage());
         time = new SimpleStringProperty(e.getTimeString());

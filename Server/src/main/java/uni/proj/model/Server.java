@@ -1,22 +1,21 @@
 package uni.proj.model;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import uni.proj.Config;
-import uni.proj.events.Command;
-import uni.proj.events.Error;
-import uni.proj.events.Info;
-import uni.proj.events.Warning;
+import uni.proj.status.Command;
+import uni.proj.status.Error;
+import uni.proj.status.Info;
+import uni.proj.status.Warning;
 
 import java.io.IOException;
-import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Locale;
 
 public class Server implements Runnable {
 
     protected ServerSocket server;
-    protected ArrayList<Socket> clients;
+    private final ObservableList<Socket> clients = FXCollections.observableArrayList();
     private final Logger logger = new Logger();
     private boolean isRunning = false;
     private Thread thread;
@@ -80,6 +79,7 @@ public class Server implements Runnable {
         }
         try {
             server.close();
+            clients.clear();
             logger.log(new Info("Server chiuso correttamente"));
         } catch (IOException e) {
             if(!server.isClosed()) {
@@ -117,6 +117,10 @@ public class Server implements Runnable {
 
     public Logger getLogger() {
         return logger;
+    }
+
+    public ObservableList<Socket> getClients() {
+        return clients;
     }
 
     public boolean isRunning() {

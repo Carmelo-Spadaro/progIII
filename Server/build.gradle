@@ -15,7 +15,7 @@ static def getPlatform() {
     return "linux"
 }
 
-def javafxVersion = '19.0.2'
+def javafxVersion = '21.0.2'
 
 dependencies {
     implementation 'io.github.cdimascio:java-dotenv:5.2.2'
@@ -43,7 +43,8 @@ tasks.withType(JavaExec).configureEach {
     jvmArgs += [
             '--enable-preview',
             "--module-path", configurations.runtimeClasspath.asPath,
-            "--add-modules", "javafx.controls,javafx.fxml,javafx.graphics"
+            "--add-modules", "javafx.controls,javafx.fxml,javafx.graphics",
+            "--enable-native-access=javafx.graphics"
     ]
 }
 

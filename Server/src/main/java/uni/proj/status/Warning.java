@@ -1,6 +1,6 @@
-package uni.proj.events;
+package uni.proj.status;
 
-public class Warning extends Event{
+public class Warning extends LogStatus {
     public Warning(String message) {
         super(message);
     }

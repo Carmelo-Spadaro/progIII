@@ -7,9 +7,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.collections.*;
 
+import java.net.Socket;
 import java.net.URL;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 import javafx.scene.layout.VBox;
@@ -20,6 +19,7 @@ import uni.proj.model.Server;
 
 public class ServerController implements Initializable {
 
+    @FXML private ListView<Socket> socketListView;
     @FXML private TableView<Log> tableView;
     @FXML private TableColumn<Log, String> typeColumn;
     @FXML private TableColumn<Log, String> messageColumn;
@@ -41,6 +41,7 @@ public class ServerController implements Initializable {
 
         logs = server.getLogger().getLogs();
         tableView.setItems(logs);
+        socketListView.setItems(server.getClients());
     }
 
     @FXML

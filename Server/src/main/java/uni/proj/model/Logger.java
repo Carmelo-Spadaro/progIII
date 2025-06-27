@@ -2,8 +2,7 @@ package uni.proj.model;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import uni.proj.events.Event;
-import uni.proj.model.Log;
+import uni.proj.status.LogStatus;
 
 import static java.io.IO.*;
 
@@ -19,13 +18,13 @@ public class Logger {
     }
 
 
-    public void log(Event event) {
+    public synchronized void log(LogStatus logStatus) {
         if (!headerPrinted) {
             printHeader();
             headerPrinted = true;
         }
-        println(event);
-        logs.add(new Log(event));
+        println(logStatus);
+        logs.add(new Log(logStatus));
         printFooter();
     }
 

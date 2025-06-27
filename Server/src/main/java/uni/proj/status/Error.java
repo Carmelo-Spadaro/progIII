@@ -1,6 +1,6 @@
-package uni.proj.events;
+package uni.proj.status;
 
-public class Error extends  Event {
+public class Error extends LogStatus {
 
     public Error(String message) {
         super(message);

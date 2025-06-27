@@ -1,6 +1,6 @@
-package uni.proj.events;
+package uni.proj.status;
 
-public class Command extends Event{
+public class Command extends LogStatus {
     public Command(String message) {
         super(message);
     }
