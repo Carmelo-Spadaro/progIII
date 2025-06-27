@@ -1,11 +1,16 @@
 package uni.proj.model;
 
+import com.google.gson.JsonSyntaxException;
+import uni.proj.model.protocol.MessageType;
+import uni.proj.model.protocol.ProtocolMessage;
+import uni.proj.model.protocol.data.*;
 import uni.proj.model.status.Info;
 import uni.proj.model.status.Error;
 import uni.proj.model.status.Message;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -36,10 +41,19 @@ public class ClientHandler implements Runnable {
                 try {
                     String line;
                     while ((line = reader.readLine()) != null) {
-                        server.getLogger().log(new Message("ricevuto: " + line + " da " + clientSocket.getRemoteSocketAddress()));
+                        try {
+                            // Prova a decodificare usando il protocol handler
+                            ProtocolMessage<?> message = server.getProtocolHandler().decode(line);
+
+                            handleMessage(message);
+
+                        } catch (JsonSyntaxException e) {
+                            // Messaggio non valido secondo il nostro protocollo
+                            server.getLogger().log(new Error("Messaggio malformato da " + clientSocket.getRemoteSocketAddress() + ": " + line));
+                        }
                     }
                 } catch (IOException e) {
-                    server.getLogger().log(new Error("errore in lettura dal client: " + e.getMessage()));
+                    server.getLogger().log(new Error("Errore in lettura dal client: " + e.getMessage()));
                 } finally {
                     running = false;
                     shutdown();
@@ -77,6 +91,37 @@ public class ClientHandler implements Runnable {
                 boolean removed = server.getClients().remove(this);
                 server.getLogger().log(removed ? new Info("rimosso handler: "+ this) : new Error("errore durante la rimozione di handler: "+ this));
             });
+        }
+    }
+
+    private void handleMessage(ProtocolMessage<?> message) {
+        switch (message.type()) {
+            case CHAT -> {
+                ChatData data = (ChatData) message.data();
+                server.getLogger().log(new Message("Messaggio da " + clientSocket.getRemoteSocketAddress() + ": " + data.message()));
+            }
+            case LOGIN -> {
+                LoginData data = (LoginData) message.data();
+                server.getLogger().log(new Message("Richiesta di Login da "+ clientSocket.getRemoteSocketAddress()));
+            }
+            case LOGOUT -> {
+                LogoutData data = (LogoutData) message.data();
+                server.getLogger().log(new Message("Richiesta di Logout da " + clientSocket.getRemoteSocketAddress()));
+            }
+            case REGISTER -> {
+                RegisterData data = (RegisterData) message.data();
+                server.getLogger().log(new Message("Richiesta di Register da " + clientSocket.getRemoteSocketAddress()));
+
+            }
+            case SEND_MAIL -> {
+                server.getLogger().log(new Message("Richiesta di Send Mail da " + clientSocket.getRemoteSocketAddress()));
+            }
+            case ERROR -> {
+            }
+            default -> {
+                server.getLogger().log(new Error("Tipo di richiesta da " + clientSocket.getRemoteSocketAddress() + " non riconosciuta"));
+                server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData("tipo di richiesta non riconosciuta")), List.of(this));
+            }
         }
     }
 

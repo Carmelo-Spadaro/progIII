@@ -5,11 +5,12 @@ import javafx.collections.ObservableList;
 import uni.proj.Config;
 import uni.proj.model.protocol.MessageType;
 import uni.proj.model.protocol.ProtocolHandler;
+import uni.proj.model.protocol.data.ChatData;
 import uni.proj.model.status.Error;
 import uni.proj.model.status.Info;
 import uni.proj.model.status.Warning;
 import uni.proj.model.status.Command;
-import uni.proj.model.protocol.Message;
+import uni.proj.model.protocol.ProtocolMessage;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -106,19 +107,24 @@ public class Server implements Runnable {
         }
     }
 
-    public void broadcast(Message message, ClientHandler except) {
+    public void broadcast(ProtocolMessage<?> message, ClientHandler except) {
+        Class<?> dataClass = protocolHandler.getDataClassForType(message.type());
+
+        String json = protocolHandler.encode(message, dataClass);
+
         for (ClientHandler client : clients) {
-            if(client.equals(except))
-                continue;
+            if (client.equals(except)) continue;
             if (client.isRunning())
-                client.send(protocolHandler.encode(message));
+                client.send(json);
         }
     }
 
-    public void send(Message message, List<ClientHandler> clients) {
+    public void send(ProtocolMessage<?> message, List<ClientHandler> clients) {
+        Class<?> dataClass = protocolHandler.getDataClassForType(message.type());
+
         for (ClientHandler client : clients) {
             if(client.isRunning()) {
-                client.send(protocolHandler.encode(message));
+                client.send(protocolHandler.encode(message, dataClass));
             }
         }
     }
@@ -140,15 +146,19 @@ public class Server implements Runnable {
                 }
             }
         } else {
-            Message message = new Message(MessageType.CHAT, command);
+            ProtocolMessage<ChatData> message = new ProtocolMessage<>(MessageType.CHAT, new ChatData(command));
             broadcast(message, null);
-            logger.log(new Info("broadcast eseguito con successo: " + protocolHandler.encode(message)));
+            logger.log(new Info("broadcast eseguito con successo: " + protocolHandler.encode(message, ChatData.class)));
         }
         return true;
     }
 
     public Logger getLogger() {
         return logger;
+    }
+
+    public ProtocolHandler getProtocolHandler() {
+        return protocolHandler;
     }
 
     public ObservableList<ClientHandler> getClients() {

@@ -4,6 +4,7 @@ public enum MessageType {
     LOGIN,
     LOGOUT,
     CHAT,
-    UPDATE_STATE,
-    ERROR
+    ERROR,
+    REGISTER,
+    SEND_MAIL
 }
