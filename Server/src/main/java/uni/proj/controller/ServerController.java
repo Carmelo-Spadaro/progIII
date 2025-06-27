@@ -18,9 +18,11 @@ import javafx.stage.Stage;
 import uni.proj.model.ClientHandler;
 import uni.proj.model.Log;
 import uni.proj.model.Server;
+import uni.proj.model.protocol.data.RegisterData;
 
 public class ServerController implements Initializable {
 
+    @FXML private ListView<RegisterData> emailListView;
     @FXML private ListView<ClientHandler> socketListView;
     @FXML private TableView<Log> tableView;
     @FXML private TableColumn<Log, String> typeColumn;
@@ -43,6 +45,7 @@ public class ServerController implements Initializable {
         logs = server.getLogger().getLogs();
         tableView.setItems(logs);
         socketListView.setItems(server.getClients());
+        emailListView.setItems(server.getEmails());
     }
 
     @FXML

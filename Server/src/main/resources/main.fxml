@@ -41,6 +41,16 @@
                 <Button text="Disconnetti" onAction="#onDisconnect"/>
             </VBox>
         </Tab>
+
+        <!-- email list tab -->
+        <Tab text="Email Salvate" closable="false">
+            <VBox spacing="10">
+                <padding>
+                    <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
+                </padding>
+                <ListView fx:id="emailListView" VBox.vgrow="ALWAYS"/>
+            </VBox>
+        </Tab>
     </TabPane>
 
     <!-- Bottom input bar -->

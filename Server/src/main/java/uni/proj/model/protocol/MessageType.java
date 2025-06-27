@@ -6,5 +6,6 @@ public enum MessageType {
     CHAT,
     ERROR,
     REGISTER,
-    SEND_MAIL
+    SEND_MAIL,
+    RESPONSE
 }

@@ -1,38 +1,46 @@
 package uni.proj.model;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import uni.proj.Config;
 import uni.proj.model.protocol.MessageType;
 import uni.proj.model.protocol.ProtocolHandler;
 import uni.proj.model.protocol.data.ChatData;
+import uni.proj.model.protocol.data.RegisterData;
 import uni.proj.model.status.Error;
 import uni.proj.model.status.Info;
 import uni.proj.model.status.Warning;
 import uni.proj.model.status.Command;
 import uni.proj.model.protocol.ProtocolMessage;
 
-import java.io.IOException;
+import java.io.*;
+import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Server implements Runnable {
 
     protected ServerSocket server;
     private final ObservableList<ClientHandler> clients = FXCollections.observableArrayList();
+    private final ObservableList<RegisterData> emails = FXCollections.observableArrayList();
     private final Logger logger = new Logger();
-    private ProtocolHandler protocolHandler = new ProtocolHandler();
+    private final ProtocolHandler protocolHandler = new ProtocolHandler();
     private boolean isRunning = false;
+    private boolean isInitaliazed = false;
     private Thread thread;
 
     public Server() {
-        logger.log(new Info("inizializzazione server"));
         initServer();
-        logger.log(new Info("server inizializzato"));
     }
 
     private void initServer() {
+        if(isInitaliazed)
+            return;
+        logger.log(new Info("inizializzazione server"));
         try {
             if (server == null || server.isClosed()) {
                 server = new ServerSocket(Config.SERVER_PORT);
@@ -41,6 +49,9 @@ public class Server implements Runnable {
             logger.log(new Error("errore durante l'inizializzazione: "+ e.getMessage()));
             throw new RuntimeException(e);
         }
+        loadRegisters();
+        logger.log(new Info("server inizializzato"));
+        isInitaliazed = true;
     }
 
     @Override
@@ -107,7 +118,7 @@ public class Server implements Runnable {
         }
     }
 
-    public void broadcast(ProtocolMessage<?> message, ClientHandler except) {
+    public synchronized void broadcast(ProtocolMessage<?> message, ClientHandler except) {
         Class<?> dataClass = protocolHandler.getDataClassForType(message.type());
 
         String json = protocolHandler.encode(message, dataClass);
@@ -119,7 +130,7 @@ public class Server implements Runnable {
         }
     }
 
-    public void send(ProtocolMessage<?> message, List<ClientHandler> clients) {
+    public synchronized void send(ProtocolMessage<?> message, List<ClientHandler> clients) {
         Class<?> dataClass = protocolHandler.getDataClassForType(message.type());
 
         for (ClientHandler client : clients) {
@@ -148,24 +159,95 @@ public class Server implements Runnable {
         } else {
             ProtocolMessage<ChatData> message = new ProtocolMessage<>(MessageType.CHAT, new ChatData(command));
             broadcast(message, null);
-            logger.log(new Info("broadcast eseguito con successo: " + protocolHandler.encode(message, ChatData.class)));
+            logger.log(new Info("broadcast eseguito con successo: " + message.data().message()));
         }
         return true;
     }
 
-    public Logger getLogger() {
+    public synchronized Logger getLogger() {
         return logger;
     }
 
-    public ProtocolHandler getProtocolHandler() {
+    public synchronized ProtocolHandler getProtocolHandler() {
         return protocolHandler;
     }
 
-    public ObservableList<ClientHandler> getClients() {
+    public synchronized ObservableList<ClientHandler> getClients() {
         return clients;
     }
 
-    public boolean isRunning() {
+    public synchronized ObservableList<RegisterData> getEmails() {
+        return emails;
+    }
+
+    public synchronized boolean isRunning() {
         return isRunning;
+    }
+
+    private void loadRegisters() {
+        Gson gson = new Gson();
+        File file = new File("data/emails.json");
+
+        if (file.exists()) {
+            try (Reader reader = new FileReader(file)) {
+                Type listType = new TypeToken<List<RegisterData>>(){}.getType();
+                List<RegisterData> emailList = gson.fromJson(reader, listType);
+
+                if (emailList != null) {
+                    javafx.application.Platform.runLater(() -> {
+                        emails.clear();
+                        emails.addAll(emailList);
+                    });
+                    logger.log(new Info("Caricate " + emailList.size() + " email da file"));
+                } else {
+                    logger.log(new Warning("Il file delle email esiste ma è vuoto"));
+                }
+            } catch (IOException e) {
+                logger.log(new Error("Errore durante il caricamento delle email: " + e.getMessage()));
+            }
+        } else {
+            logger.log(new Warning("File emails.json non trovato, nessuna email caricata"));
+        }
+    }
+
+    public synchronized void saveRegister(RegisterData data) {
+        Gson gson = new Gson();
+        File file = new File("data/emails.json");
+
+        try {
+            List<RegisterData> emailList;
+
+            if (file.exists()) {
+                // Leggi lista esistente
+                try (Reader reader = new FileReader(file)) {
+                    Type listType = new TypeToken<List<RegisterData>>(){}.getType();
+                    emailList = gson.fromJson(reader, listType);
+                }
+                if (emailList == null) {
+                    emailList = new ArrayList<>();
+                }
+            } else {
+                emailList = new ArrayList<>();
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+            }
+
+            // Controlla se l'email è già presente
+            boolean exists = emailList.stream()
+                    .anyMatch(r -> r.email().equalsIgnoreCase(data.email()));
+
+            if (!exists) {
+                emailList.add(data);
+                try (Writer writer = new FileWriter(file)) {
+                    gson.toJson(emailList, writer);
+                }
+            } else {
+                // Email già presente, gestisci se vuoi
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Gestisci eccezioni/log
+        }
     }
 }

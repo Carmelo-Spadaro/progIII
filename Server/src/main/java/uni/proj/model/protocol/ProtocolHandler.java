@@ -2,6 +2,7 @@ package uni.proj.model.protocol;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import uni.proj.model.protocol.data.*;
 
@@ -17,7 +18,8 @@ public class ProtocolHandler {
             ErrorData.class,
             RegisterData.class,
             LogoutData.class,
-            SendMailData.class
+            SendMailData.class,
+            ResponseData.class
     );
 
     public String encode(ProtocolMessage<?> message, Class<?> dataClass) {
@@ -29,13 +31,22 @@ public class ProtocolHandler {
         return gson.toJson(message, type);
     }
 
-    public ProtocolMessage<?> decode(String json) {
+    public ProtocolMessage<?> decode(String json) throws JsonSyntaxException  {
         JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
         MessageType type = gson.fromJson(jsonObject.get("type"), MessageType.class);
+        if(type == null)
+            throw new JsonSyntaxException("Errore durante la verifica del tipo");
 
         Class<?> dataClass = getDataClassForType(type);
 
+        if(jsonObject.get("data") == null)
+            throw new JsonSyntaxException("Errore, l'oggetto non contiene il campo data");
+
         Object data = gson.fromJson(jsonObject.get("data"), dataClass);
+
+        if(data == null)
+            throw new JsonSyntaxException("Errore, l'oggetto data non può contenere null");
+
 
         return new ProtocolMessage<>(type, data);
     }
@@ -48,6 +59,7 @@ public class ProtocolHandler {
             case REGISTER -> RegisterData.class;
             case LOGOUT -> LogoutData.class;
             case SEND_MAIL -> SendMailData.class;
+            case RESPONSE -> ResponseData.class;
         };
     }
 

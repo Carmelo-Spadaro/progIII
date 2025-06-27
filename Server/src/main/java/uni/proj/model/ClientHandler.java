@@ -1,6 +1,8 @@
 package uni.proj.model;
 
 import com.google.gson.JsonSyntaxException;
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import uni.proj.model.protocol.MessageType;
 import uni.proj.model.protocol.ProtocolMessage;
 import uni.proj.model.protocol.data.*;
@@ -13,6 +15,7 @@ import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClientHandler implements Runnable {
 
@@ -20,6 +23,7 @@ public class ClientHandler implements Runnable {
     private final Socket clientSocket;
     private final BlockingQueue<String> outgoingMessages = new LinkedBlockingQueue<>();
     private volatile boolean running = true;
+    private boolean isLogged = false;
 
     public ClientHandler(Server server, Socket clientSocket) {
         this.server = server;
@@ -100,23 +104,83 @@ public class ClientHandler implements Runnable {
                 ChatData data = (ChatData) message.data();
                 server.getLogger().log(new Message("Messaggio da " + clientSocket.getRemoteSocketAddress() + ": " + data.message()));
             }
+            case RESPONSE -> {
+                ResponseData data = (ResponseData) message.data();
+                server.getLogger().log(new Message("Risposta da " + clientSocket.getRemoteSocketAddress() + ": " + data.message()));
+            }
             case LOGIN -> {
                 LoginData data = (LoginData) message.data();
                 server.getLogger().log(new Message("Richiesta di Login da "+ clientSocket.getRemoteSocketAddress()));
+                if(isLogged) {
+                    server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData("Client gia' loggato")), List.of(this));
+                    server.getLogger().log(new Info("richiesta di Login fallita, client gia' loggato"));
+                    return;
+                }
+                if (!isValidEmail(data.email())) {
+                    server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData("Email non valida")), List.of(this));
+                    server.getLogger().log(new Info("richiesta di Login fallita, formato email non valido"));
+                    return;
+                }
+
+                Platform.runLater(() -> {
+                    ObservableList<RegisterData> emails = server.getEmails();
+
+                    boolean isRegistered = emails.stream()
+                            .anyMatch(r -> r.email().equalsIgnoreCase(data.email()));
+
+                    if (isRegistered) {
+                        server.send(new ProtocolMessage<>(MessageType.RESPONSE, new ResponseData("Login eseguito")), List.of(this));
+                        server.getLogger().log(new Info("richiesta di login eseguita"));
+                        isLogged = true;
+                    } else {
+                        server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData("Mail non registrata")), List.of(this));
+                        server.getLogger().log(new Info("richiesta di login fallita"));
+                    }
+                });
             }
             case LOGOUT -> {
-                LogoutData data = (LogoutData) message.data();
                 server.getLogger().log(new Message("Richiesta di Logout da " + clientSocket.getRemoteSocketAddress()));
+                if(!isLogged) {
+                    server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData("Client gia' disconnesso")), List.of(this));
+                    server.getLogger().log(new Info("richiesta di Logout fallita, client gia' disconnesso"));
+                } else {
+                    server.send(new ProtocolMessage<>(MessageType.RESPONSE, new ResponseData("Logout eseguito")), List.of(this));
+                    server.getLogger().log(new Info("richiesta di Logout completata"));
+                    isLogged = false;
+                }
             }
             case REGISTER -> {
                 RegisterData data = (RegisterData) message.data();
                 server.getLogger().log(new Message("Richiesta di Register da " + clientSocket.getRemoteSocketAddress()));
+                if (!isValidEmail(data.email())) {
+                    server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData("Email non valida")), List.of(this));
+                    server.getLogger().log(new Info("richiesta di Register fallita, formato email non valido"));
+                    return;
+                }
 
+                Platform.runLater(() -> {
+                    ObservableList<RegisterData> emails = server.getEmails();
+
+                    boolean isRegistered = emails.stream()
+                            .anyMatch(r -> r.email().equalsIgnoreCase(data.email()));
+
+                    if (isRegistered) {
+                        server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData("questa email e' gia' registrata")), List.of(this));
+                        server.getLogger().log(new Info("richiesta di Register fallita, mail gia' registrata"));
+                    } else {
+                        emails.add(data);
+                        server.send(new ProtocolMessage<>(MessageType.RESPONSE, new ResponseData("mail registrata")), List.of(this));
+                        server.getLogger().log(new Info("richiesta di Register completata"));
+                        new Thread(() -> server.saveRegister(data)).start();
+                    }
+                });
             }
             case SEND_MAIL -> {
                 server.getLogger().log(new Message("Richiesta di Send Mail da " + clientSocket.getRemoteSocketAddress()));
             }
             case ERROR -> {
+                ErrorData data = (ErrorData) message.data();
+                server.getLogger().log(new Error("Errore da " + clientSocket.getRemoteSocketAddress() + ": " + data.message()));
             }
             default -> {
                 server.getLogger().log(new Error("Tipo di richiesta da " + clientSocket.getRemoteSocketAddress() + " non riconosciuta"));
@@ -149,5 +213,8 @@ public class ClientHandler implements Runnable {
     @Override
     public String toString() {
         return clientSocket.getRemoteSocketAddress().toString();
+    }
+    private boolean isValidEmail(String email) {
+        return email != null && email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
     }
 }
