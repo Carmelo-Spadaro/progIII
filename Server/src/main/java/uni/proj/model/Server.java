@@ -15,7 +15,7 @@ import java.net.Socket;
 public class Server implements Runnable {
 
     protected ServerSocket server;
-    private final ObservableList<Socket> clients = FXCollections.observableArrayList();
+    private final ObservableList<ClientHandler> clients = FXCollections.observableArrayList();
     private final Logger logger = new Logger();
     private boolean isRunning = false;
     private Thread thread;
@@ -53,16 +53,21 @@ public class Server implements Runnable {
     }
 
     public void listen() {
-        logger.log(new Info("server in ascolto sulla porta: " + server.getLocalPort() ));
-        isRunning=true;
-        while (!server.isClosed()) {
-            logger.log(new Info("attendo una connessione"));
+        logger.log(new Info("server in ascolto sulla porta: " + server.getLocalPort()));
+        isRunning = true;
+        while (isRunning) {
             try {
                 Socket socket = server.accept();
-                clients.add(socket);
                 logger.log(new Info("connessione accettata da " + socket.getRemoteSocketAddress()));
+
+                // Aggiorna la lista dei client nella UI
+                ClientHandler handler = new ClientHandler(this, socket);
+
+                javafx.application.Platform.runLater(() -> clients.add(handler));
+
+                new Thread(handler).start();
             } catch (IOException e) {
-                if(server.isClosed()) {
+                if (server.isClosed()) {
                     logger.log(new Info("server chiuso"));
                 } else {
                     logger.log(new Error("errore durante la connessione " + e.getMessage()));
@@ -73,28 +78,40 @@ public class Server implements Runnable {
     }
 
     public void stopServer() {
+        isRunning = false;
         if(server.isClosed()) {
             logger.log(new Warning("Il server e' gia' chiuso"));
             return;
         }
         try {
-            server.close();
+            // Chiudi tutti i client
+            for (ClientHandler client : clients) {
+                client.shutdown();
+            }
             clients.clear();
+
+            // Chiudi il ServerSocket
+            server.close();
+
             logger.log(new Info("Server chiuso correttamente"));
         } catch (IOException e) {
-            if(!server.isClosed()) {
+            if (!server.isClosed()) {
                 logger.log(new Error("Errore durante la chiusura del server: " + e.getMessage()));
             }
         }
     }
 
     public void broadcast(String message) {
-
+        for (ClientHandler client : clients) {
+            if (client.isRunning()) {
+                client.send(message);
+            }
+        }
     }
 
     public boolean execute(String command) {
-        logger.log(new Command("Comando ricevuto: "+command));
         if(command.startsWith("/")) {
+            logger.log(new Command("Comando ricevuto: "+command));
             command = command.toLowerCase();
             switch (command) {
                 case "/clear" -> {
@@ -119,7 +136,7 @@ public class Server implements Runnable {
         return logger;
     }
 
-    public ObservableList<Socket> getClients() {
+    public ObservableList<ClientHandler> getClients() {
         return clients;
     }
 

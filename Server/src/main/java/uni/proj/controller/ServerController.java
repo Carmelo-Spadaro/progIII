@@ -1,5 +1,6 @@
 package uni.proj.controller;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -14,12 +15,13 @@ import java.util.ResourceBundle;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import uni.proj.model.ClientHandler;
 import uni.proj.model.Log;
 import uni.proj.model.Server;
 
 public class ServerController implements Initializable {
 
-    @FXML private ListView<Socket> socketListView;
+    @FXML private ListView<ClientHandler> socketListView;
     @FXML private TableView<Log> tableView;
     @FXML private TableColumn<Log, String> typeColumn;
     @FXML private TableColumn<Log, String> messageColumn;
@@ -34,8 +36,7 @@ public class ServerController implements Initializable {
         typeColumn.setCellValueFactory(data -> data.getValue().typeProperty());
         messageColumn.setCellValueFactory(data -> data.getValue().messageProperty());
         timeColumn.setCellValueFactory(data -> data.getValue().timeProperty());
-
-
+        
         server = new Server();
         server.startServer();
 
@@ -50,6 +51,20 @@ public class ServerController implements Initializable {
         server.execute(command);
         inputField.clear();
         tableView.scrollTo(logs.size() - 1);
+    }
+
+    @FXML
+    public void onDisconnect() {
+        ClientHandler selected = socketListView.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            selected.shutdown();
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Nessuna selezione");
+            alert.setHeaderText(null);
+            alert.setContentText("Seleziona un client dalla lista per disconnetterlo.");
+            alert.showAndWait();
+        }
     }
 
     @FXML

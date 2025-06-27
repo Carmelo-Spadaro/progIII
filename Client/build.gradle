@@ -3,10 +3,31 @@ plugins {
     id 'application'
 }
 
+repositories {
+    mavenCentral()
+}
+
+// Metodo per determinare la piattaforma
+static def getPlatform() {
+    def osName = System.getProperty("os.name").toLowerCase()
+    if (osName.contains("win")) return "win"
+    if (osName.contains("mac")) return "mac"
+    return "linux"
+}
+
+def javafxVersion = '21.0.2'
+
 dependencies {
-    // Dipendenze specifiche del modulo Server
-    // ad esempio, se usa Client internamente:
-    // implementation project(':Client')
+    implementation 'io.github.cdimascio:java-dotenv:5.2.2'
+
+    implementation "org.openjfx:javafx-base:${javafxVersion}:${getPlatform()}"
+    implementation "org.openjfx:javafx-controls:${javafxVersion}:${getPlatform()}"
+    implementation "org.openjfx:javafx-fxml:${javafxVersion}:${getPlatform()}"
+    implementation "org.openjfx:javafx-graphics:${javafxVersion}:${getPlatform()}"
+}
+
+application {
+    mainClass = 'ClientMain'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -19,11 +40,12 @@ tasks.withType(Test).configureEach {
 }
 
 tasks.withType(JavaExec).configureEach {
-    jvmArgs += '--enable-preview'
-}
-
-application {
-    mainClass = 'uni.proj.ServerMain'
+    jvmArgs += [
+            '--enable-preview',
+            "--module-path", configurations.runtimeClasspath.asPath,
+            "--add-modules", "javafx.controls,javafx.fxml,javafx.graphics",
+            "--enable-native-access=javafx.graphics"
+    ]
 }
 
 java {
