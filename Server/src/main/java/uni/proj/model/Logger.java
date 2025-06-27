@@ -2,7 +2,7 @@ package uni.proj.model;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import uni.proj.status.LogStatus;
+import uni.proj.model.status.LogStatus;
 
 import static java.io.IO.*;
 

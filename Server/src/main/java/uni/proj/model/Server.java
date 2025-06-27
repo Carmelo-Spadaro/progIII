@@ -3,20 +3,25 @@ package uni.proj.model;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import uni.proj.Config;
-import uni.proj.status.Command;
-import uni.proj.status.Error;
-import uni.proj.status.Info;
-import uni.proj.status.Warning;
+import uni.proj.model.protocol.MessageType;
+import uni.proj.model.protocol.ProtocolHandler;
+import uni.proj.model.status.Error;
+import uni.proj.model.status.Info;
+import uni.proj.model.status.Warning;
+import uni.proj.model.status.Command;
+import uni.proj.model.protocol.Message;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
 public class Server implements Runnable {
 
     protected ServerSocket server;
     private final ObservableList<ClientHandler> clients = FXCollections.observableArrayList();
     private final Logger logger = new Logger();
+    private ProtocolHandler protocolHandler = new ProtocolHandler();
     private boolean isRunning = false;
     private Thread thread;
 
@@ -101,10 +106,19 @@ public class Server implements Runnable {
         }
     }
 
-    public void broadcast(String message) {
+    public void broadcast(Message message, ClientHandler except) {
         for (ClientHandler client : clients) {
-            if (client.isRunning()) {
-                client.send(message);
+            if(client.equals(except))
+                continue;
+            if (client.isRunning())
+                client.send(protocolHandler.encode(message));
+        }
+    }
+
+    public void send(Message message, List<ClientHandler> clients) {
+        for (ClientHandler client : clients) {
+            if(client.isRunning()) {
+                client.send(protocolHandler.encode(message));
             }
         }
     }
@@ -126,8 +140,9 @@ public class Server implements Runnable {
                 }
             }
         } else {
-            broadcast(command);
-            logger.log(new Info("broadcast eseguito con successo: " + command));
+            Message message = new Message(MessageType.CHAT, command);
+            broadcast(message, null);
+            logger.log(new Info("broadcast eseguito con successo: " + protocolHandler.encode(message)));
         }
         return true;
     }

@@ -1,4 +1,4 @@
-package uni.proj.status;
+package uni.proj.model.status;
 
 public class Info extends LogStatus {
 

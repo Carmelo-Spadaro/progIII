@@ -1,8 +1,8 @@
 package uni.proj.model;
 
-import uni.proj.status.Info;
-import uni.proj.status.Error;
-import uni.proj.status.Message;
+import uni.proj.model.status.Info;
+import uni.proj.model.status.Error;
+import uni.proj.model.status.Message;
 
 import java.io.*;
 import java.net.Socket;

@@ -2,7 +2,7 @@ package uni.proj.model;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import uni.proj.status.LogStatus;
+import uni.proj.model.status.LogStatus;
 
 public class Log {
     private final StringProperty type;

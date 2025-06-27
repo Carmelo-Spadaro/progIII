@@ -1,4 +1,4 @@
-package uni.proj.status;
+package uni.proj.model.status;
 
 import java.time.Instant;
 
