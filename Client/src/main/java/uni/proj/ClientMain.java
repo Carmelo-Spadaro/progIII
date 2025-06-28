@@ -14,7 +14,7 @@ public class ClientMain extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/main.fxml"));
         Scene scene = new Scene(loader.load(), 600, 400);
         stage.setScene(scene);
-        stage.setTitle("Server");
+        stage.setTitle("Client");
 
         ClientController controller = loader.getController();
 

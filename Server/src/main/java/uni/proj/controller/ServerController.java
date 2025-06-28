@@ -1,5 +1,7 @@
 package uni.proj.controller;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -51,23 +53,62 @@ public class ServerController implements Initializable {
     @FXML
     private void onSend() {
         String command = inputField.getText().trim();
-        server.execute(command);
+
+        Task<Object> task = new Task<>(){
+            @Override
+            protected Object call() {
+                server.execute(command);
+                return null;
+            }
+
+            @Override
+            protected void succeeded() {
+                tableView.scrollTo(logs.size() - 1);
+            }
+
+            @Override
+            protected void failed() {
+                tableView.scrollTo(logs.size() - 1);
+            }
+        };
+        new Thread(task).start();
+
         inputField.clear();
-        tableView.scrollTo(logs.size() - 1);
     }
 
     @FXML
     public void onDisconnect() {
         ClientHandler selected = socketListView.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            selected.shutdown();
-        } else {
+
+        if (selected == null) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Nessuna selezione");
             alert.setHeaderText(null);
             alert.setContentText("Seleziona un client dalla lista per disconnetterlo.");
             alert.showAndWait();
+            return;
         }
+
+        Task<Void> task = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                selected.shutdown(); // può lanciare eccezioni
+                return null;
+            }
+
+            @Override
+            protected void failed() {
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Errore");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Errore durante la disconnessione del client.");
+                    alert.showAndWait();
+                });
+            }
+        };
+
+        new Thread(task).start();
     }
 
     @FXML

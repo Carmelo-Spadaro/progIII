@@ -4,6 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
 
+<?import javafx.scene.shape.Circle?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="uni.proj.controller.ClientController"
@@ -13,7 +14,10 @@
         <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
     </padding>
 
-
+    <HBox spacing="5">
+        <Label text="Stato:"/>
+        <Circle fx:id="statusIndicator" radius="8" fill="GRAY"/>
+    </HBox>
 
     <!-- Bottom input bar -->
     <HBox spacing="10">
