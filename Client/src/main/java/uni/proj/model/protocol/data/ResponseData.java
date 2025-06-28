@@ -1,4 +1,6 @@
 package uni.proj.model.protocol.data;
 
-public record ResponseData(String message) {
+import uni.proj.model.protocol.MessageType;
+
+public record ResponseData(MessageType responseTo, String message) {
 }

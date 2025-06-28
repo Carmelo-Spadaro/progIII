@@ -2,6 +2,7 @@ package uni.proj.model;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import uni.proj.Config;
@@ -9,6 +10,7 @@ import uni.proj.model.protocol.MessageType;
 import uni.proj.model.protocol.ProtocolHandler;
 import uni.proj.model.protocol.data.ChatData;
 import uni.proj.model.protocol.data.RegisterData;
+import uni.proj.model.protocol.data.SendMailData;
 import uni.proj.model.status.Error;
 import uni.proj.model.status.Info;
 import uni.proj.model.status.Warning;
@@ -19,7 +21,9 @@ import java.io.*;
 import java.lang.reflect.Type;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 public class Server implements Runnable {
@@ -241,6 +245,19 @@ public class Server implements Runnable {
                 try (Writer writer = new FileWriter(file)) {
                     gson.toJson(emailList, writer);
                 }
+
+                String encodedEmail = Base64.getUrlEncoder()
+                        .withoutPadding()
+                        .encodeToString(data.email().getBytes(StandardCharsets.UTF_8));
+
+                File inboxFile = new File("data/inbox/" + encodedEmail + ".json");
+                inboxFile.getParentFile().mkdirs();
+
+                if (!inboxFile.exists()) {
+                    try (Writer inboxWriter = new FileWriter(inboxFile)) {
+                        inboxWriter.write("[]"); // inbox vuota
+                    }
+                }
             } else {
                 // Email già presente, gestisci se vuoi
             }
@@ -249,5 +266,26 @@ public class Server implements Runnable {
             e.printStackTrace();
             // Gestisci eccezioni/log
         }
+    }
+
+    public void sendEmail(SendMailData data) {
+        for (String email : data.receiversEmail()) {
+            saveMailToInbox(data, email);
+
+            Platform.runLater(() ->
+                    clients.stream()
+                            .map(ClientHandler::getLoggedEmail)
+                            .filter(loggedEmail -> loggedEmail != null && loggedEmail.equals(email))
+                            .forEach(_ -> sendLiveEmail(data, email))
+            );
+        }
+    }
+
+    public void saveMailToInbox(SendMailData data, String email) {
+
+    }
+
+    public void sendLiveEmail(SendMailData data, String email) {
+
     }
 }

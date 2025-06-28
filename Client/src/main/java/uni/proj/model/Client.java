@@ -3,13 +3,20 @@ package uni.proj.model;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import uni.proj.Config;
+import uni.proj.model.protocol.MessageType;
 import uni.proj.model.protocol.ProtocolHandler;
+import uni.proj.model.protocol.ProtocolMessage;
+import uni.proj.model.protocol.data.*;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Client implements Runnable {
 
@@ -17,7 +24,8 @@ public class Client implements Runnable {
         STARTED,
         LOGGED,
         STOPPED,
-        INITIALIZED
+        INITIALIZED,
+        OFFLINE
     }
 
     private Socket socket;
@@ -26,7 +34,7 @@ public class Client implements Runnable {
     private final BlockingQueue<String> outgoingMessages = new LinkedBlockingQueue<>();
     private final ProtocolHandler protocolHandler;
     private Thread readerThread;
-    private final ObjectProperty<State> stateProperty = new SimpleObjectProperty<>();
+    private final ObjectProperty<State> stateProperty = new SimpleObjectProperty<>(State.OFFLINE);
 
     private volatile boolean running = true;
 
@@ -38,10 +46,11 @@ public class Client implements Runnable {
     @Override
     public void run() {
         while (running) {
-            if (!(stateProperty.get() == State.INITIALIZED || stateProperty.get() == State.STOPPED)) {
+            System.out.println(getState());
+            if (!(getState() == State.INITIALIZED || getState() == State.STOPPED)) {
                 break;
             }
-            if (stateProperty.get() == State.STOPPED) {
+            if (getState() == State.STOPPED) {
                 setState(State.INITIALIZED);
             }
 
@@ -55,22 +64,23 @@ public class Client implements Runnable {
                 while (running && !socket.isClosed()) {
                     try {
                         String msg = outgoingMessages.take();
+                        if(msg.isEmpty())
+                            System.out.println("messaggio vuoto");
                         out.println(msg);
                     } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt(); // buona pratica
+                        Thread.currentThread().interrupt();
                         break;
                     }
                 }
 
             } catch (IOException e) {
-                System.err.println("Errore di connessione: " + e.getMessage());
+                // ignora
             } finally {
                 closeResources();
                 setState(State.STOPPED);
 
                 if (running) {
                     try {
-                        System.out.println("Riconnessione tra 5 secondi...");
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
@@ -79,6 +89,7 @@ public class Client implements Runnable {
                 }
             }
         }
+        setState(State.OFFLINE);
     }
 
     private void connect() throws IOException {
@@ -96,36 +107,94 @@ public class Client implements Runnable {
         try {
             String line;
             while (running && (line = in.readLine()) != null) {
-                handleMessage(line);
+                handleMessage(protocolHandler.decode(line));
             }
         } catch (IOException e) {
             System.err.println("Errore durante la lettura: " + e.getMessage());
         } finally {
             closeResources();
-            setState(State.STOPPED);
         }
     }
 
-    private void handleMessage(String message) {
-        // Qui gestisci il messaggio ricevuto dal server
-        System.out.println("Ricevuto dal server: " + message);
-        // Potresti aggiornare il model, chiamare observer, ecc.
+    private void handleMessage(ProtocolMessage<?> message) {
+        switch (message.type()) {
+            case CHAT -> {
+                ChatData data = (ChatData) message.data();
+                System.out.println("messaggio dal server: "+data.message());
+            }
+            case RESPONSE -> {
+                ResponseData data = (ResponseData) message.data();
+                switch (data.responseTo()) {
+                    case LOGIN -> setState(State.LOGGED);
+                    case LOGOUT -> setState(State.STARTED);
+                    case CHAT, ERROR, RESPONSE, REGISTER, SEND_MAIL -> {
+                        // ignora
+                    }
+                    default -> {
+                        System.out.println("Risposta non riconosciuta");
+                    }
+                }
+            }
+            case ERROR -> {
+                ErrorData data = (ErrorData) message.data();
+                switch (data.responseTo()) {
+                    case LOGIN, LOGOUT, CHAT, ERROR, RESPONSE, REGISTER, SEND_MAIL -> {
+                        System.out.println(data.message());
+                    }
+                    default -> {
+                        System.out.println("Risposta non riconosciuta");
+                    }
+                }
+            }
+            case LOGIN, SEND_MAIL, REGISTER, LOGOUT -> {
+                // ignora
+            }
+            default -> {
+                System.out.println("tipo di richiesta non riconosciuta");
+            }
+        }
     }
 
-    public void sendMessage(String message) {
-        outgoingMessages.offer(message);
+    public synchronized void send(ProtocolMessage<?> message) {
+        Class<?> dataClass = protocolHandler.getDataClassForType(message.type());
+
+       outgoingMessages.offer(protocolHandler.encode(message, dataClass));
     }
 
-    public boolean execute(String command) {
-        if(command.startsWith("/")) {
-            command = command.toLowerCase();
+    public boolean execute(String query) {
+        query = query.strip();
+        if(query.startsWith("/")) {
+            String[] commandQuery = query.split(" ");
+            String command = commandQuery[0].toLowerCase();
             switch (command) {
+                case "/login" -> {
+                    if(commandQuery.length == 2 && isValidEmail(commandQuery[1])) {
+                        send(new ProtocolMessage<>(MessageType.LOGIN, new LoginData(commandQuery[1])));
+                        return true;
+                    } else {
+                        System.out.println("comando non valido");
+                        return false;
+                    }
+                }
+                case "/logout" -> {
+                    send(new ProtocolMessage<>(MessageType.LOGOUT, new LogoutData("logout")));
+                    return true;
+                }
+                case "/register" -> {
+                    if(commandQuery.length == 2 && isValidEmail(commandQuery[1])) {
+                        send(new ProtocolMessage<>(MessageType.REGISTER, new RegisterData(commandQuery[1])));
+                        return true;
+                    } else {
+                        System.out.println("comando non valido");
+                        return false;
+                    }
+                }
                 default -> {
                     return false;
                 }
             }
         } else {
-            sendMessage(command);
+            send(new ProtocolMessage<>(MessageType.CHAT, new ChatData(query)));
         }
         return true;
     }
@@ -136,7 +205,8 @@ public class Client implements Runnable {
         Thread.currentThread().interrupt(); // interrompe anche questo thread se è in attesa
         outgoingMessages.offer(""); // sblocca il take() nel caso non arrivi mai un messaggio
         closeResources();
-        setState(State.STOPPED);
+        setState(State.OFFLINE);
+        System.out.println("stop eseguito");
     }
 
     private void closeResources() {
@@ -153,11 +223,35 @@ public class Client implements Runnable {
         Platform.runLater(() -> stateProperty.set(newState));
     }
 
+    private State getState() {
+        AtomicReference<State> state = new AtomicReference<>();
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Platform.runLater(() -> {
+            state.set(stateProperty.get());
+            latch.countDown();
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            stop();
+            System.err.println("Thread interrotto mentre attendeva il valore dello stato.");
+            return null;
+        }
+
+        return state.get();
+    }
+
     public ProtocolHandler getProtocolHandler() {
         return protocolHandler;
     }
 
     public ObjectProperty<State> getStateProperty() {
         return stateProperty;
+    }
+
+    private boolean isValidEmail(String email) {
+        return email != null && email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
     }
 }

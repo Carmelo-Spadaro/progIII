@@ -34,6 +34,7 @@ public class ClientController implements Initializable {
                     case INITIALIZED -> statusIndicator.setFill(Color.ORANGE);
                     case STARTED -> statusIndicator.setFill(Color.GREEN);
                     case LOGGED -> statusIndicator.setFill(Color.DODGERBLUE);
+                    case OFFLINE -> statusIndicator.setFill(Color.GRAY);
                 }
             });
         });
