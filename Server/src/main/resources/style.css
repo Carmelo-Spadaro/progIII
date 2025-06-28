@@ -1,0 +1,226 @@
+/* === ROOT (sfondo e font base) === */
+.root {
+    -fx-background-color: #121212;
+    -fx-font-family: "Segoe UI", sans-serif;
+    -fx-font-size: 14px;
+    -fx-text-fill: #e0e0e0;
+}
+
+/* === TABPANE STILE E COLORE === */
+.tab-pane {
+    -fx-background-color: #121212;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: #121212;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: #121212;
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: #121212;
+}
+
+/* === TABS === */
+.tab-pane .tab {
+    -fx-background-color: transparent;
+    -fx-text-fill: #aaaaaa;
+    -fx-padding: 8 16 8 16;
+    -fx-font-weight: normal;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2 0;
+}
+
+.tab-pane .tab:hover {
+    -fx-text-fill: #e0e0e0;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: transparent transparent #2962FF transparent;
+    -fx-border-width: 0 0 2 0;
+    -fx-font-weight: bold;
+}
+
+/* === CONTENUTO TABS === */
+.tab-content {
+    -fx-background-color: #121212;
+    -fx-padding: 10;
+}
+
+/* === BUTTONS === */
+.button {
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 8 16;
+}
+
+/* Pulsante INVIA */
+.button-send {
+    -fx-background-color: #2962FF;
+    -fx-text-fill: white;
+}
+.button-send:hover {
+    -fx-background-color: #0039cb;
+}
+
+/* Pulsante HELP */
+.button-help {
+    -fx-background-color: #616161;
+    -fx-text-fill: white;
+}
+.button-help:hover {
+    -fx-background-color: #757575;
+}
+
+/* Pulsante DISCONNETTI */
+.button-disconnect {
+    -fx-background-color: #d32f2f;
+    -fx-text-fill: white;
+}
+.button-disconnect:hover {
+    -fx-background-color: #b71c1c;
+}
+
+/* === TEXTFIELD === */
+.text-field {
+    -fx-background-color: #2c2c2c;
+    -fx-text-fill: #e0e0e0;
+    -fx-prompt-text-fill: #888;
+    -fx-background-radius: 5;
+    -fx-border-color: #444;
+    -fx-border-radius: 5;
+}
+
+/* === TABLEVIEW === */
+.table-view {
+    -fx-background-color: #1e1e1e;
+    -fx-control-inner-background: #1e1e1e;
+    -fx-text-background-color: #e0e0e0;
+    -fx-border-color: #333;
+    -fx-border-radius: 5;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #2a2a2a;
+}
+
+.table-view .column-header {
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-color: transparent transparent #444 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-text-fill: #ffffff;
+}
+
+.table-view .table-cell {
+    -fx-padding: 8px;
+    -fx-text-fill: #e0e0e0;
+    -fx-font-size: 13px;
+    -fx-border-color: transparent;
+}
+
+.table-view .table-row-cell {
+    -fx-background-color: #1e1e1e;
+}
+
+.table-view .table-row-cell:filled:hover {
+    -fx-background-color: #2c2c2c;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #37474f;
+    -fx-text-fill: white;
+}
+
+/* === LISTVIEW === */
+.list-view {
+    -fx-background-color: #1e1e1e;
+    -fx-control-inner-background: #1e1e1e;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #333;
+    -fx-border-radius: 5;
+}
+
+.list-cell {
+    -fx-text-fill: #e0e0e0;
+    -fx-background-color: transparent;
+    -fx-padding: 6 10;
+}
+
+.list-cell:filled:hover {
+    -fx-background-color: #2c2c2c;
+}
+
+.list-cell:selected {
+    -fx-background-color: #37474f;
+    -fx-text-fill: white;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: white;
+}
+
+.table-view .filler {
+    -fx-background-color: #121212;
+}
+
+/* === TABELLA COMPLETAMENTE NERA === */
+.table-view {
+    -fx-background-color: black;                    /* Contenitore esterno */
+    -fx-control-inner-background: black;            /* Sfondo interno (celle non piene) */
+    -fx-table-cell-border-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.table-view .filler {
+    -fx-background-color: black;                    /* Riempie spazi vuoti in basso */
+}
+
+.table-view .column-header-background {
+    -fx-background-color: black;                    /* Sfondo intestazioni colonne */
+}
+
+.table-view .column-header {
+    -fx-background-color: black;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;                           /* Testo intestazioni */
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* Celle della tabella */
+.table-view .table-cell {
+    -fx-background-color: black;                    /* Sfondo celle */
+    -fx-text-fill: #e0e0e0;                         /* Testo celle */
+    -fx-font-size: 13px;
+}
+
+/* Riga normale */
+.table-view .table-row-cell {
+    -fx-background-color: black;
+}
+
+/* Riga hover */
+.table-view .table-row-cell:filled:hover {
+    -fx-background-color: #1a1a1a;
+}
+
+/* Riga selezionata */
+.table-view .table-row-cell:selected {
+    -fx-background-color: #37474f;
+    -fx-text-fill: white;
+}
+
+
+* {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
