@@ -40,7 +40,8 @@ public class Client implements Runnable {
     private Thread readerThread;
     private String loggedMail = null;
     private final ObjectProperty<State> stateProperty = new SimpleObjectProperty<>(State.OFFLINE);
-    ObservableList<SendMailData> mails = FXCollections.observableArrayList();
+
+    private final ObservableList<SendMailData> mails = FXCollections.observableArrayList();
 
     private volatile boolean running = true;
 
@@ -363,6 +364,11 @@ public class Client implements Runnable {
 
     public ObjectProperty<State> getStateProperty() {
         return stateProperty;
+    }
+
+
+    public ObservableList<SendMailData> getMails() {
+        return mails;
     }
 
     private boolean isValidEmail(String email) {
