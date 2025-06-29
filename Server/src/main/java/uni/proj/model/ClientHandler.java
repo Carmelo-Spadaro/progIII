@@ -195,6 +195,35 @@ public class ClientHandler implements Runnable {
                     }
                 }
                 server.sendEmail(data);
+                server.getLogger().log(new Info("richiesta di Send Mail completata"));
+                server.send(new ProtocolMessage<>(MessageType.RESPONSE, new ResponseData(MessageType.SEND_MAIL, "Email inviata con successo")), List.of(this));
+            }
+            case GET_INBOX -> {
+                GetInboxData data = (GetInboxData) message.data();
+                server.getLogger().log(new Message("Richiesta di Get Inbox da " + clientSocket.getRemoteSocketAddress()));
+                if(this.loggedEmail == null) {
+                    server.getLogger().log(new Info("L'utente non e' ancora loggato, impossibile recuperare inbox"));
+                    server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData(MessageType.GET_INBOX,"Il client deve prima essere loggato, operazione annullata")), List.of(this));
+                    return;
+                }
+                if(!this.loggedEmail.equals(data.email())) {
+                    server.getLogger().log(new Info("Email non coincide con l'email di login, operazione annullata"));
+                    server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData(MessageType.GET_INBOX,"Inserisci la mail di login in email")), List.of(this));
+                    return;
+                }
+                server.sendInbox(this);
+                server.getLogger().log(new Info("richiesta di Send Mail completata"));
+                server.send(new ProtocolMessage<>(MessageType.RESPONSE, new ResponseData(MessageType.GET_INBOX, "Email inviata con successo")), List.of(this));
+            }
+            case FORWARD -> {
+                ForwardData data = (ForwardData) message.data();
+                server.getLogger().log(new Message("richiesta di Forward da "+ clientSocket.getRemoteSocketAddress()));
+                if(this.loggedEmail == null) {
+                    server.getLogger().log(new Info("L'utente non e' ancora loggato, impossibile inoltrare la mail"));
+                    server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData(MessageType.FORWARD,"Il client deve prima essere loggato, operazione annullata")), List.of(this));
+                    return;
+                }
+                server.forwardMail(data, this);
             }
             case ERROR -> {
                 ErrorData data = (ErrorData) message.data();

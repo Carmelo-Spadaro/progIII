@@ -7,5 +7,7 @@ public enum MessageType {
     ERROR,
     REGISTER,
     SEND_MAIL,
-    RESPONSE
+    RESPONSE,
+    GET_INBOX,
+    FORWARD
 }
