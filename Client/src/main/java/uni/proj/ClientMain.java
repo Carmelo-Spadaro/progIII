@@ -18,6 +18,7 @@ public class ClientMain extends Application {
 
         ClientController controller = loader.getController();
 
+
         stage.setOnCloseRequest(event -> {
             controller.shutdown();
             Platform.exit();

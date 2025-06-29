@@ -1,0 +1,50 @@
+[
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "ciao.ciao@edu.unito.it",
+      "title": "CIAONE",
+      "body": "ciao bro come va",
+      "receiversEmail": [
+        "ciaone.ciaone@edu.unito.it",
+        "ciao.ciao@edu.unito.it"
+      ]
+    }
+  },
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "ciaone.ciaone@edu.unito.it",
+      "title": "Bellostoprogetto",
+      "body": "che bel prog di merda",
+      "receiversEmail": [
+        "ciao.ciao@edu.unito.it",
+        "ciaone.ciaone@edu.unito.it"
+      ]
+    }
+  },
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "ciao.ciao@edu.unito.it",
+      "title": "CIAO",
+      "body": "bella raga 130",
+      "receiversEmail": [
+        "ciaone.ciaone@edu.unito.it",
+        "ciao.ciao@edu.unito.it"
+      ]
+    }
+  },
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "ciao.ciao@edu.unito.it",
+      "title": "CIAO",
+      "body": "ciaoooooo",
+      "receiversEmail": [
+        "ciaone.ciaone@edu.unito.it",
+        "ciao.ciao@edu.unito.it"
+      ]
+    }
+  }
+]

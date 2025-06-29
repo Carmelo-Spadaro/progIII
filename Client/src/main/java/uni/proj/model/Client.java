@@ -33,6 +33,7 @@ public class Client implements Runnable {
     }
 
     private Socket socket;
+    private ClientListener listener;
     private BufferedReader in;
     private PrintWriter out;
     private final BlockingQueue<String> outgoingMessages = new LinkedBlockingQueue<>();
@@ -130,6 +131,7 @@ public class Client implements Runnable {
                 System.out.println("messaggio dal server: "+data.message());
             }
             case RESPONSE -> {
+                listener.onResponse((ResponseData) message.data());
                 ResponseData data = (ResponseData) message.data();
                 switch (data.responseTo()) {
                     case LOGIN -> setState(State.LOGGED);
@@ -149,6 +151,7 @@ public class Client implements Runnable {
                 }
             }
             case ERROR -> {
+                listener.onError((ErrorData) message.data());
                 ErrorData data = (ErrorData) message.data();
                 switch (data.responseTo()) {
                     case LOGOUT, CHAT, ERROR, RESPONSE, REGISTER, SEND_MAIL -> {
@@ -332,6 +335,10 @@ public class Client implements Runnable {
         } catch (IOException e) {
             // Ignora
         }
+    }
+
+    public void setListener(ClientListener listener) {
+        this.listener = listener;
     }
 
     private void setState(State newState) {

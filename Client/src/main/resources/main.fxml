@@ -5,11 +5,11 @@
 <?import javafx.geometry.Insets?>
 
 <?import javafx.scene.shape.Circle?>
+<?import javafx.scene.text.Text?>
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="uni.proj.controller.ClientController"
       spacing="10.0">
-
     <padding>
         <Insets top="10.0" right="10.0" bottom="10.0" left="10.0"/>
     </padding>
@@ -19,9 +19,50 @@
         <Circle fx:id="statusIndicator" radius="8" fill="GRAY"/>
     </HBox>
 
-    <!-- Bottom input bar -->
-    <HBox spacing="10">
-        <TextField fx:id="inputField" HBox.hgrow="ALWAYS" promptText="Scrivi un comando..."/>
-        <Button text="Invia" onAction="#onSend"/>
-    </HBox>
+    <VBox fx:id="login">
+
+        <!-- Bottom input bar -->
+        <HBox spacing="10">
+            <TextField fx:id="inputField" HBox.hgrow="ALWAYS" promptText="Email"/>
+            <Button text="Login" onAction="#onLogin"/>
+            <Button text="Register" onAction="#onRegister"/>
+        </HBox>
+    </VBox>
+
+    <VBox fx:id="main" visible="false" managed="false">
+        <TabPane VBox.vgrow="ALWAYS" styleClass="main-tab-pane">
+            <tabs>
+
+                <!-- Logger Tab -->
+                <Tab text="Inbox" closable="false">
+                    <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="tab-content">
+                        <padding>
+                            <Insets top="10" right="10" bottom="10" left="10"/>
+                        </padding>
+                        <ListView fx:id="mailList" VBox.vgrow="ALWAYS"/>
+                    </VBox>
+                </Tab>
+
+                <!-- Socket Tab -->
+                <Tab text="Scrivi" closable="false">
+                    <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="tab-content">
+                        <padding>
+                            <Insets top="10" right="10" bottom="10" left="10"/>
+                        </padding>
+                        <TextField fx:id="titleField" HBox.hgrow="ALWAYS" promptText="Oggetto"/>
+                        <TextField fx:id="bodyField" HBox.hgrow="ALWAYS" promptText="Contenuto"/>
+                        <TextField fx:id="emailInput" promptText="Inserisci email e premi INVIO" />
+                        <FlowPane fx:id="emailContainer" hgap="5" vgap="5" />
+                        <Button text="Invia" onAction="#onSendMessage" styleClass="button-disconnect"/>
+                    </VBox>
+                </Tab>
+
+            </tabs>
+        </TabPane>
+    </VBox>
+
+
+    <TextField fx:id="commandField" HBox.hgrow="ALWAYS" promptText="Scrivi un comando..."/>
+    <Button text="Invia" onAction="#onSend"/>
+
 </VBox>

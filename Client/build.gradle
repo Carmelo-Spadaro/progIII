@@ -28,7 +28,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'ClientMain'
+    mainClass = 'uni.proj.ClientMain'
 }
 
 tasks.withType(JavaCompile).configureEach {
