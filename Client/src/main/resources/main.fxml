@@ -54,6 +54,7 @@
                         <TextField fx:id="emailInput" promptText="Inserisci email e premi INVIO" />
                         <FlowPane fx:id="emailContainer" hgap="5" vgap="5" />
                         <Button text="Invia" onAction="#onSendMessage" styleClass="button-disconnect"/>
+                        <Label fx:id="errorLabel" textFill="red" visible="false" />
                     </VBox>
                 </Tab>
 

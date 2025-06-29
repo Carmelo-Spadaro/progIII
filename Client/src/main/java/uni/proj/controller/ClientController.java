@@ -32,6 +32,7 @@ import java.util.Set;
 
 public class ClientController implements Initializable, ClientListener {
 
+    @FXML private Label errorLabel;
     @FXML private TextField titleField;
     @FXML private TextField bodyField;
     @FXML private TextField commandField;
@@ -124,8 +125,24 @@ public class ClientController implements Initializable, ClientListener {
 
     @FXML
     public void onSendMessage() {
-        String title = escapeQuotes(titleField.getText().trim());
-        String body = escapeQuotes(bodyField.getText().trim());
+        String title = titleField.getText();
+        String body = bodyField.getText();
+
+        if (title == null || title.trim().isEmpty()) {
+            showError("Il campo Oggetto è obbligatorio e non può essere vuoto.");
+            return;
+        }
+        if (body == null || body.trim().isEmpty()) {
+            showError("Il campo Contenuto è obbligatorio e non può essere vuoto.");
+            return;
+        }
+        if (emailSet.isEmpty()) {
+            showError("Devi inserire almeno un destinatario email.");
+            return;
+        }
+
+        title = escapeQuotes(title.trim());
+        body = escapeQuotes(body.trim());
 
         String command = "/sendmail \"" + title + "\" \"" + body + "\"";
         for (String email : emailSet) {
@@ -133,8 +150,15 @@ public class ClientController implements Initializable, ClientListener {
         }
         client.execute(command);
 
+        emailSet.clear();
+        emailContainer.getChildren().clear();
         titleField.clear();
         bodyField.clear();
+    }
+
+    private void showError(String message) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
     }
 
     public void shutdown() {
