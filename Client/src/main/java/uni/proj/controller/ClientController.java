@@ -52,6 +52,7 @@ public class ClientController implements Initializable, ClientListener {
         client = new Client();
         client.setListener(this);
         mails = client.getMails();
+        mailList.setCellFactory(list -> new MailItemCell());
         mailList.setItems(mails);
         emailInput.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
@@ -123,11 +124,15 @@ public class ClientController implements Initializable, ClientListener {
 
     @FXML
     public void onSendMessage() {
-        String command = "/sendmail \"" + titleField.getText().trim() + "\" \"" + bodyField.getText().trim() + "\"";
-        for(String email : emailSet) {
+        String title = escapeQuotes(titleField.getText().trim());
+        String body = escapeQuotes(bodyField.getText().trim());
+
+        String command = "/sendmail \"" + title + "\" \"" + body + "\"";
+        for (String email : emailSet) {
             command += " " + email.trim();
         }
         client.execute(command);
+
         titleField.clear();
         bodyField.clear();
     }
@@ -151,5 +156,9 @@ public class ClientController implements Initializable, ClientListener {
 
     private boolean isValidEmail(String email) {
         return email != null && email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+    }
+
+    private String escapeQuotes(String s) {
+        return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }

@@ -1,1 +1,50 @@
-[{"type":"SEND_MAIL","data":{"senderEmail":"carmelo.spadaro@edu.unito.it","title":"titolo","body":"testo","receiversEmail":["carmelo.spadaro@edu.unito.it","test.test1@gmail.com","pippi.pluto@gmail.com"]}},{"type":"SEND_MAIL","data":{"senderEmail":"carmelo.spadaro@edu.unito.it","title":"questo è un bel titoletto","body":"quanto è bello questo bel codice","receiversEmail":["test.test1@gmail.com","carmelo.spadaro@edu.unito.it"]}},{"type":"SEND_MAIL","data":{"senderEmail":"carmelo.spadaro@edu.unito.it","title":"testMail","body":"ciao","receiversEmail":["carmelo.spadaro@edu.unito.it","pippi.pluto@gmail.com"]}}]
+[
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "carmelo.spadaro@edu.unito.it",
+      "title": "titolo",
+      "body": "testo",
+      "receiversEmail": [
+        "carmelo.spadaro@edu.unito.it",
+        "test.test1@gmail.com",
+        "pippi.pluto@gmail.com"
+      ]
+    }
+  },
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "carmelo.spadaro@edu.unito.it",
+      "title": "questo è un bel titoletto",
+      "body": "quanto è bello questo bel codice",
+      "receiversEmail": [
+        "test.test1@gmail.com",
+        "carmelo.spadaro@edu.unito.it"
+      ]
+    }
+  },
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "carmelo.spadaro@edu.unito.it",
+      "title": "testMail",
+      "body": "ciao",
+      "receiversEmail": [
+        "carmelo.spadaro@edu.unito.it",
+        "pippi.pluto@gmail.com"
+      ]
+    }
+  },
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "carmelo.spadaro@edu.unito.it",
+      "title": "provo Un \"titolo",
+      "body": "ciao",
+      "receiversEmail": [
+        "carmelo.spadaro@edu.unito.it"
+      ]
+    }
+  }
+]

@@ -384,13 +384,18 @@ public class Client implements Runnable {
 
     private List<String> parseCommandArguments(String input) {
         List<String> tokens = new ArrayList<>();
-        Matcher matcher = Pattern.compile("\"([^\"]*)\"|(\\S+)").matcher(input);
+        Matcher matcher = Pattern.compile("\"((?:[^\"\\\\]|\\\\.)*)\"|(\\S+)").matcher(input);
         while (matcher.find()) {
+            String token;
             if (matcher.group(1) != null) {
-                tokens.add(matcher.group(1)); // Contenuto tra virgolette
+                // Gruppo 1 = stringa tra virgolette con possibili escape
+                token = matcher.group(1)
+                        .replaceAll("\\\\(.)", "$1");  // rimuove l'escape davanti a qualsiasi carattere
             } else {
-                tokens.add(matcher.group(2)); // Parola singola
+                // Gruppo 2 = parola singola senza virgolette
+                token = matcher.group(2);
             }
+            tokens.add(token);
         }
         return tokens;
     }

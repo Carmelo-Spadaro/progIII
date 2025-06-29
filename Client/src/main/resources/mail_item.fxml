@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.text.Text?>
+<HBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="uni.proj.controller.MailItemCellController" spacing="10">
+    <VBox spacing="5">
+        <Label fx:id="senderLabel" style="-fx-font-weight: bold;" />
+        <Label fx:id="titleLabel" style="-fx-font-style: italic;" />
+        <Text fx:id="bodyPreview" wrappingWidth="300"/>
+        <Label fx:id="receiversLabel" style="-fx-font-size: 10;" />
+    </VBox>
+</HBox>
