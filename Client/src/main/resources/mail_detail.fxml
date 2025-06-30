@@ -4,41 +4,45 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Text?>
-
 <?import javafx.geometry.Insets?>
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="uni.proj.controller.MailDetailController" spacing="10">
-    <Button text="Indietro" onAction="#onBack"/>
-    <TabPane VBox.vgrow="ALWAYS" styleClass="main-tab-pane">
+
+<VBox xmlns:fx="http://javafx.com/fxml"
+      fx:controller="uni.proj.controller.MailDetailController"
+      spacing="10"
+      styleClass="root"
+      stylesheets="@email.css">
+
+    <Button text="Indietro" onAction="#onBack" styleClass="button"/>
+    <TabPane VBox.vgrow="ALWAYS" styleClass="tab-pane main-tab-pane">
         <tabs>
-            <Tab text="Visualizza" closable="false">
+            <Tab text="Visualizza" closable="false" styleClass="tab">
                 <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="tab-content">
-                    <Label fx:id="senderLabel" style="-fx-font-weight: bold;" />
-                    <Label fx:id="receiversLabel" />
-                    <Label fx:id="titleLabel" style="-fx-font-size: 16px;" />
-                    <TextArea fx:id="bodyArea" editable="false" wrapText="true" prefHeight="300"/>
-                    <TitledPane text="Inoltra" expanded="false">
+                    <Label fx:id="senderLabel" styleClass="label-bold" />
+                    <Label fx:id="receiversLabel" styleClass="label"/>
+                    <Label fx:id="titleLabel" styleClass="label-title" />
+                    <TextArea fx:id="bodyArea" editable="false" wrapText="true" prefHeight="300" styleClass="text-area"/>
+                    <TitledPane text="Inoltra" expanded="false" styleClass="titled-pane">
                         <VBox spacing="10">
-                            <TextField fx:id="emailInput" promptText="Inserisci email e premi INVIO" />
+                            <TextField fx:id="emailInput" promptText="Inserisci email e premi INVIO" styleClass="text-field"/>
                             <FlowPane fx:id="emailContainer" hgap="5" vgap="5" />
                             <HBox spacing="10">
-                                <Label fx:id="errorForwardLabel" textFill="red" visible="false" />
-                                <Button text="Inoltra" onAction="#onForward"/>
+                                <Label fx:id="errorForwardLabel" textFill="red" visible="false" styleClass="label" />
+                                <Button text="Inoltra" onAction="#onForward" styleClass="button"/>
                             </HBox>
                         </VBox>
                     </TitledPane>
                 </VBox>
             </Tab>
-            <Tab text="Rispondi" closable="false">
+            <Tab text="Rispondi" closable="false" styleClass="tab">
                 <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="tab-content">
-                    <HBox spacing="10">
+                    <HBox spacing="10" styleClass="hbox">
                         <padding>
                             <Insets top="10" right="10" bottom="10" left="10"/>
                         </padding>
-                        <TextField fx:id="bodyField" HBox.hgrow="ALWAYS" promptText="Contenuto"/>
-                        <Button text="Rispondi" onAction="#onReply"/>
-                        <Button text="Rispondi a tutti" onAction="#onReplyAll"/>
-                        <Label fx:id="errorLabel" textFill="red" visible="false" />
+                        <TextField fx:id="bodyField" HBox.hgrow="ALWAYS" promptText="Contenuto" styleClass="text-field"/>
+                        <Button text="Rispondi" onAction="#onReply" styleClass="button"/>
+                        <Button text="Rispondi a tutti" onAction="#onReplyAll" styleClass="button"/>
+                        <Label fx:id="errorLabel" textFill="red" visible="false" styleClass="label" />
                     </HBox>
                 </VBox>
             </Tab>

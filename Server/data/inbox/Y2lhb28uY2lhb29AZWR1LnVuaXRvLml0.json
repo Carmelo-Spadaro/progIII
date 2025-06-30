@@ -1,1 +1,52 @@
-[{"type":"SEND_MAIL","data":{"senderEmail":"ciao.ciao@edu.unito.it","title":"TEST","body":"Questo è un test","receiversEmail":["ciaone.ciaone@edu.unito.it","ciaoo.ciaoo@edu.unito.it","ciao.ciao@edu.unito.it"]}},{"type":"SEND_MAIL","data":{"senderEmail":"ciaoo.ciaoo@edu.unito.it","title":"TEST","body":"ma che cazzo dici","receiversEmail":["ciao.ciao@edu.unito.it","ciaone.ciaone@edu.unito.it","ciaoo.ciaoo@edu.unito.it"]}},{"type":"SEND_MAIL","data":{"senderEmail":"ciaone.ciaone@edu.unito.it","title":"Bellostoprogetto","body":"che bel prog di merda","receiversEmail":["ciao.ciao@edu.unito.it","ciaone.ciaone@edu.unito.it","ciaoo.ciaoo@edu.unito.it"]}}]
+[
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "ciao.ciao@edu.unito.it",
+      "title": "TEST",
+      "body": "Questo è un test",
+      "receiversEmail": [
+        "ciaone.ciaone@edu.unito.it",
+        "ciaoo.ciaoo@edu.unito.it",
+        "ciao.ciao@edu.unito.it"
+      ]
+    }
+  },
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "ciaoo.ciaoo@edu.unito.it",
+      "title": "TEST",
+      "body": "ma che cazzo dici",
+      "receiversEmail": [
+        "ciao.ciao@edu.unito.it",
+        "ciaone.ciaone@edu.unito.it",
+        "ciaoo.ciaoo@edu.unito.it"
+      ]
+    }
+  },
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "ciaone.ciaone@edu.unito.it",
+      "title": "Bellostoprogetto",
+      "body": "che bel prog di merda",
+      "receiversEmail": [
+        "ciao.ciao@edu.unito.it",
+        "ciaone.ciaone@edu.unito.it",
+        "ciaoo.ciaoo@edu.unito.it"
+      ]
+    }
+  },
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "ciao.ciao@edu.unito.it",
+      "title": "esame di merda",
+      "body": "questo esame fa veramnete cagare",
+      "receiversEmail": [
+        "ciaoo.ciaoo@edu.unito.it"
+      ]
+    }
+  }
+]
