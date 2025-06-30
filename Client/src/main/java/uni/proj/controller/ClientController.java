@@ -8,16 +8,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.stage.Stage;
 import uni.proj.model.Client;
 import uni.proj.model.ClientListener;
 import uni.proj.model.protocol.data.ErrorData;
@@ -29,9 +29,12 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class ClientController implements Initializable, ClientListener {
 
+    @FXML private Button logout;
+    @FXML private StackPane mainStack;
     @FXML private Label errorLabel;
     @FXML private TextField titleField;
     @FXML private TextField bodyField;
@@ -53,7 +56,7 @@ public class ClientController implements Initializable, ClientListener {
         client = new Client();
         client.setListener(this);
         mails = client.getMails();
-        mailList.setCellFactory(list -> new MailItemCell());
+        mailList.setCellFactory(list -> new MailItemCell(this));
         mailList.setItems(mails);
         emailInput.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
@@ -66,6 +69,16 @@ public class ClientController implements Initializable, ClientListener {
                 }
             }
         });
+        inputField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                String email = emailInput.getText().trim();
+                if (!email.isEmpty() && isValidEmail(email)) {
+                    login(inputField.getText());
+                    inputField.clear();
+                }
+            }
+        });
+
         bindStateIndicator();
         new Thread(client).start();
     }
@@ -82,9 +95,20 @@ public class ClientController implements Initializable, ClientListener {
                 case LOGIN -> {
                     login.setVisible(false);
                     login.setManaged(false);
+                    logout.setVisible(true);
+                    logout.setManaged(true);
                     main.setVisible(true);
                     main.setManaged(true);
                     client.execute("/getinbox");
+                }
+                case LOGOUT -> {
+                    backToInbox();
+                    login.setVisible(true);
+                    login.setManaged(true);
+                    logout.setVisible(false);
+                    logout.setManaged(false);
+                    main.setVisible(false);
+                    main.setManaged(false);
                 }
             }
         });
@@ -156,6 +180,33 @@ public class ClientController implements Initializable, ClientListener {
         bodyField.clear();
     }
 
+    private boolean login(String email) {
+        String command = "/login " + email.trim();
+        return client.execute(command);
+    }
+
+    @FXML
+    public void onLogin() {
+        String email = inputField.getText();
+        if (!email.isEmpty() && isValidEmail(email)) {
+            login(email);
+            inputField.clear();
+        }
+
+    }
+
+    @FXML
+    public void onLogout() {
+        client.execute("/logout");
+    }
+
+    @FXML
+    public void onRegister() {
+        String command = "/register " + inputField.getText().trim();
+        client.execute(command);
+        inputField.clear();
+    }
+
     private void showError(String message) {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
@@ -165,18 +216,6 @@ public class ClientController implements Initializable, ClientListener {
         client.stop();
     }
 
-    public void onLogin() {
-        String command = "/login " + inputField.getText().trim();
-        client.execute(command);
-        inputField.clear();
-
-    }
-
-    public void onRegister() {
-        String command = "/register " + inputField.getText().trim();
-        client.execute(command);
-        inputField.clear();
-    }
 
     private boolean isValidEmail(String email) {
         return email != null && email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
@@ -184,5 +223,27 @@ public class ClientController implements Initializable, ClientListener {
 
     private String escapeQuotes(String s) {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    public void showMailDetail(SendMailData data) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/mail_detail.fxml"));
+            Parent detailRoot = loader.load();
+            MailDetailController detailController = loader.getController();
+            detailController.setData(data, this, client);
+            mainStack.getChildren().add(detailRoot); // vista "sopra
+            main.setVisible(false);
+            main.setManaged(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void backToInbox() {
+        if (mainStack.getChildren().size() > 1) {
+            mainStack.getChildren().removeLast();
+            main.setVisible(true);
+            main.setManaged(true);
+        }
     }
 }

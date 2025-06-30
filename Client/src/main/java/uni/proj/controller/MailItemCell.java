@@ -1,8 +1,11 @@
 package uni.proj.controller;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 import uni.proj.model.protocol.data.SendMailData;
 
 import java.io.IOException;
@@ -11,7 +14,7 @@ public class MailItemCell extends ListCell<SendMailData> {
     private HBox root;
     private MailItemCellController controller;
 
-    public MailItemCell() {
+    public MailItemCell(ClientController clientController) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/mail_item.fxml"));
             root = loader.load();
@@ -20,6 +23,15 @@ public class MailItemCell extends ListCell<SendMailData> {
             e.printStackTrace();
             root = new HBox(); // fallback
         }
+        setOnMouseClicked(event -> {
+            if (!isEmpty() && event.getClickCount() == 2) {
+                openDetailedView(getItem(), clientController);
+            }
+        });
+    }
+
+    private void openDetailedView(SendMailData data, ClientController clientController) {
+        clientController.showMailDetail(data);
     }
 
     @Override

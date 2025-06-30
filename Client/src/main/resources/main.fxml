@@ -17,50 +17,52 @@
     <HBox spacing="5">
         <Label text="Stato:"/>
         <Circle fx:id="statusIndicator" radius="8" fill="GRAY"/>
+        <Button fx:id="logout" text="Logout" onAction="#onLogout" visible="false" managed="false"/>
     </HBox>
+    <StackPane fx:id="mainStack" VBox.vgrow="ALWAYS">
+        <VBox fx:id="login">
 
-    <VBox fx:id="login">
+            <!-- Bottom input bar -->
+            <HBox spacing="10">
+                <TextField fx:id="inputField" HBox.hgrow="ALWAYS" promptText="Email"/>
+                <Button text="Login" onAction="#onLogin"/>
+                <Button text="Register" onAction="#onRegister"/>
+            </HBox>
+        </VBox>
 
-        <!-- Bottom input bar -->
-        <HBox spacing="10">
-            <TextField fx:id="inputField" HBox.hgrow="ALWAYS" promptText="Email"/>
-            <Button text="Login" onAction="#onLogin"/>
-            <Button text="Register" onAction="#onRegister"/>
-        </HBox>
-    </VBox>
+        <VBox fx:id="main" visible="false" managed="false">
+            <TabPane VBox.vgrow="ALWAYS" styleClass="main-tab-pane">
+                <tabs>
 
-    <VBox fx:id="main" visible="false" managed="false">
-        <TabPane VBox.vgrow="ALWAYS" styleClass="main-tab-pane">
-            <tabs>
+                    <!-- Logger Tab -->
+                    <Tab text="Inbox" closable="false">
+                        <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="tab-content">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+                            <ListView fx:id="mailList" VBox.vgrow="ALWAYS"/>
+                        </VBox>
+                    </Tab>
 
-                <!-- Logger Tab -->
-                <Tab text="Inbox" closable="false">
-                    <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="tab-content">
-                        <padding>
-                            <Insets top="10" right="10" bottom="10" left="10"/>
-                        </padding>
-                        <ListView fx:id="mailList" VBox.vgrow="ALWAYS"/>
-                    </VBox>
-                </Tab>
+                    <!-- Socket Tab -->
+                    <Tab text="Scrivi" closable="false">
+                        <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="tab-content">
+                            <padding>
+                                <Insets top="10" right="10" bottom="10" left="10"/>
+                            </padding>
+                            <TextField fx:id="titleField" HBox.hgrow="ALWAYS" promptText="Oggetto"/>
+                            <TextField fx:id="bodyField" HBox.hgrow="ALWAYS" promptText="Contenuto"/>
+                            <TextField fx:id="emailInput" promptText="Inserisci email e premi INVIO" />
+                            <FlowPane fx:id="emailContainer" hgap="5" vgap="5" />
+                            <Button text="Invia" onAction="#onSendMessage" styleClass="button-disconnect"/>
+                            <Label fx:id="errorLabel" textFill="red" visible="false" />
+                        </VBox>
+                    </Tab>
 
-                <!-- Socket Tab -->
-                <Tab text="Scrivi" closable="false">
-                    <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="tab-content">
-                        <padding>
-                            <Insets top="10" right="10" bottom="10" left="10"/>
-                        </padding>
-                        <TextField fx:id="titleField" HBox.hgrow="ALWAYS" promptText="Oggetto"/>
-                        <TextField fx:id="bodyField" HBox.hgrow="ALWAYS" promptText="Contenuto"/>
-                        <TextField fx:id="emailInput" promptText="Inserisci email e premi INVIO" />
-                        <FlowPane fx:id="emailContainer" hgap="5" vgap="5" />
-                        <Button text="Invia" onAction="#onSendMessage" styleClass="button-disconnect"/>
-                        <Label fx:id="errorLabel" textFill="red" visible="false" />
-                    </VBox>
-                </Tab>
-
-            </tabs>
-        </TabPane>
-    </VBox>
+                </tabs>
+            </TabPane>
+        </VBox>
+    </StackPane>
 
 
     <TextField fx:id="commandField" HBox.hgrow="ALWAYS" promptText="Scrivi un comando..."/>

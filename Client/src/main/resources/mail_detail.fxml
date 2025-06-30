@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+
+<?import javafx.geometry.Insets?>
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="uni.proj.controller.MailDetailController" spacing="10">
+    <Button text="Indietro" onAction="#onBack"/>
+    <TabPane VBox.vgrow="ALWAYS" styleClass="main-tab-pane">
+        <tabs>
+            <Tab text="Visualizza" closable="false">
+                <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="tab-content">
+                    <Label fx:id="senderLabel" style="-fx-font-weight: bold;" />
+                    <Label fx:id="receiversLabel" />
+                    <Label fx:id="titleLabel" style="-fx-font-size: 16px;" />
+                    <TextArea fx:id="bodyArea" editable="false" wrapText="true" prefHeight="300"/>
+                    <TitledPane text="Inoltra" expanded="false">
+                        <VBox spacing="10">
+                            <TextField fx:id="emailInput" promptText="Inserisci email e premi INVIO" />
+                            <FlowPane fx:id="emailContainer" hgap="5" vgap="5" />
+                            <HBox spacing="10">
+                                <Label fx:id="errorForwardLabel" textFill="red" visible="false" />
+                                <Button text="Inoltra" onAction="#onForward"/>
+                            </HBox>
+                        </VBox>
+                    </TitledPane>
+                </VBox>
+            </Tab>
+            <Tab text="Rispondi" closable="false">
+                <VBox spacing="10" VBox.vgrow="ALWAYS" styleClass="tab-content">
+                    <HBox spacing="10">
+                        <padding>
+                            <Insets top="10" right="10" bottom="10" left="10"/>
+                        </padding>
+                        <TextField fx:id="bodyField" HBox.hgrow="ALWAYS" promptText="Contenuto"/>
+                        <Button text="Rispondi" onAction="#onReply"/>
+                        <Button text="Rispondi a tutti" onAction="#onReplyAll"/>
+                        <Label fx:id="errorLabel" textFill="red" visible="false" />
+                    </HBox>
+                </VBox>
+            </Tab>
+        </tabs>
+    </TabPane>
+</VBox>
