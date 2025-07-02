@@ -13,6 +13,7 @@
       stylesheets="@email.css">
 
     <Button text="Indietro" onAction="#onBack" styleClass="button"/>
+    <Button fx:id="delete" text="Cancella" onAction="#onDelete" styleClass="button"/>
     <TabPane VBox.vgrow="ALWAYS" styleClass="tab-pane main-tab-pane">
         <tabs>
             <Tab text="Visualizza" closable="false" styleClass="tab">

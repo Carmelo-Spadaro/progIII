@@ -55,6 +55,11 @@
     -fx-padding: 10;
 }
 
+#delete {
+    -fx-background-color: #d32f2f;
+    -fx-text-fill: white;
+}
+
 /* BUTTONS */
 .button {
     -fx-background-radius: 6;
@@ -122,7 +127,7 @@
 /* TITLED PANE */
 .titled-pane > .title {
     -fx-background-color: #1e1e1e;
-    -fx-text-fill: #e0e0e0;
+    -fx-text-fill: #e0e0e0 !important;
     -fx-font-weight: bold;
     -fx-font-size: 14px;
     -fx-padding: 8 10;

@@ -1,1 +1,14 @@
-[{"type":"SEND_MAIL","data":{"senderEmail":"carmelo.spadaro@edu.unito.it","title":"titolo","body":"testo","receiversEmail":["test.test1@gmail.com"]}},{"type":"SEND_MAIL","data":{"senderEmail":"carmelo.spadaro@edu.unito.it","title":"titolo","body":"testo","receiversEmail":["carmelo.spadaro@edu.unito.it","test.test1@gmail.com","pippi.pluto@gmail.com"]}},{"type":"SEND_MAIL","data":{"senderEmail":"carmelo.spadaro@edu.unito.it","title":"questo e\u0027 il titolo della mail","body":"questo e\u0027 il corpo della mail","receiversEmail":["test.test1@gmail.com"]}},{"type":"SEND_MAIL","data":{"senderEmail":"carmelo.spadaro@edu.unito.it","title":"questo è un bel titoletto","body":"quanto è bello questo bel codice","receiversEmail":["test.test1@gmail.com","carmelo.spadaro@edu.unito.it"]}}]
+[
+  {
+    "type": "SEND_MAIL",
+    "data": {
+      "senderEmail": "carmelo.spadaro@edu.unito.it",
+      "title": "seconda mail",
+      "body": "seconda mail",
+      "receiversEmail": [
+        "carmelo.spadaro@edu.unito.it",
+        "test.test1@gmail.com"
+      ]
+    }
+  }
+]

@@ -9,5 +9,6 @@ public enum MessageType {
     SEND_MAIL,
     RESPONSE,
     GET_INBOX,
-    FORWARD
+    FORWARD,
+    DELETE
 }

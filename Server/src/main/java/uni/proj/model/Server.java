@@ -9,10 +9,7 @@ import javafx.concurrent.Task;
 import uni.proj.Config;
 import uni.proj.model.protocol.MessageType;
 import uni.proj.model.protocol.ProtocolHandler;
-import uni.proj.model.protocol.data.ChatData;
-import uni.proj.model.protocol.data.ForwardData;
-import uni.proj.model.protocol.data.RegisterData;
-import uni.proj.model.protocol.data.SendMailData;
+import uni.proj.model.protocol.data.*;
 import uni.proj.model.status.Error;
 import uni.proj.model.status.Info;
 import uni.proj.model.status.Warning;
@@ -322,7 +319,7 @@ public class Server implements Runnable {
 
             // Se il file esiste, carica l'array esistente
             if (Files.exists(inboxFile)) {
-                String content = Files.readString(inboxFile);
+                String content = Files.readString(inboxFile, StandardCharsets.UTF_8);
                 inboxArray = JsonParser.parseString(content).getAsJsonArray();
             } else {
                 // Altrimenti, crea un array vuoto
@@ -358,7 +355,7 @@ public class Server implements Runnable {
 
             // Se il file esiste, carica l'array esistente
             if (Files.exists(inboxFile)) {
-                String content = Files.readString(inboxFile);
+                String content = Files.readString(inboxFile, StandardCharsets.UTF_8);
                 inboxArray = JsonParser.parseString(content).getAsJsonArray();
             } else {
                 inboxArray = new JsonArray();
@@ -397,7 +394,7 @@ public class Server implements Runnable {
 
         try {
             // Step 2: leggiamo il contenuto del file
-            String jsonContent = Files.readString(inboxFile);
+            String jsonContent = Files.readString(inboxFile, StandardCharsets.UTF_8);
             JsonArray inboxArray = JsonParser.parseString(jsonContent).getAsJsonArray();
 
             // Step 3: cerchiamo se c'è una mail identica a quella da inoltrare
@@ -474,7 +471,7 @@ public class Server implements Runnable {
                 if (!Files.exists(oldInbox)) continue;
 
                 try {
-                    JsonArray inbox = JsonParser.parseString(Files.readString(oldInbox)).getAsJsonArray();
+                    JsonArray inbox = JsonParser.parseString(Files.readString(oldInbox, StandardCharsets.UTF_8)).getAsJsonArray();
                     boolean modified = false;
 
                     for (JsonElement el : inbox) {
@@ -494,7 +491,7 @@ public class Server implements Runnable {
                     }
 
                     if (modified) {
-                        Files.writeString(oldInbox, gson.toJson(inbox), StandardOpenOption.TRUNCATE_EXISTING);
+                        Files.writeString(oldInbox, gson.toJson(inbox), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING);
                     }
 
                 } catch (IOException e) {
@@ -520,14 +517,14 @@ public class Server implements Runnable {
                 JsonArray inbox;
                 try {
                     if (Files.exists(newInbox)) {
-                        inbox = JsonParser.parseString(Files.readString(newInbox)).getAsJsonArray();
+                        inbox = JsonParser.parseString(Files.readString(newInbox, StandardCharsets.UTF_8)).getAsJsonArray();
                     } else {
                         Files.createDirectories(newInbox.getParent());
                         inbox = new JsonArray();
                     }
                     inbox.add(mailJson.deepCopy());
 
-                    Files.writeString(newInbox, gson.toJson(inbox), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+                    Files.writeString(newInbox, gson.toJson(inbox), StandardCharsets.UTF_8, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -578,5 +575,45 @@ public class Server implements Runnable {
             thread.setDaemon(true);
             thread.start();
         });
+    }
+
+    public void deleteMail(SendMailData mail, ClientHandler client) {
+        String loggedEmail = client.getLoggedEmail();
+        String encodedEmail = Base64.getUrlEncoder().withoutPadding().encodeToString(loggedEmail.getBytes(StandardCharsets.UTF_8));
+        Path inboxFile = Paths.get("data", "inbox", encodedEmail + ".json");
+
+        if (!Files.exists(inboxFile)) {
+            System.out.println("Inbox file not found for: " + loggedEmail);
+            return;
+        }
+
+        boolean modified = false;
+
+        try {
+            JsonArray inbox = JsonParser.parseString(Files.readString(inboxFile, StandardCharsets.UTF_8)).getAsJsonArray();
+            System.out.println("\nMAIL DA CERCARE:\n\n"+mail);
+
+            for (JsonElement el : inbox) {
+                SendMailData decoded = (SendMailData) protocolHandler.decode(el.toString()).data();
+                System.out.println("\nCONFRONTO CON:\n\n"+decoded);
+                if(decoded.equals(mail)) {
+                    inbox.remove(el);
+                    modified = true;
+                    break;
+                }
+            }
+            if(modified)
+                Files.writeString(inboxFile, inbox.toString(), StandardCharsets.UTF_8);
+
+        } catch (IOException e) {
+            //ignora
+        }
+        if(modified) {
+            logger.log(new Info("mail cancellata correttamente"));
+            send(new ProtocolMessage<>(MessageType.RESPONSE, new ResponseData(MessageType.DELETE, "mail eliminata correttamente")), List.of(client));
+        } else {
+            logger.log(new Info("mail non trovata"));
+            send(new ProtocolMessage<>(MessageType.ERROR, new ResponseData(MessageType.DELETE, "mail non trovata")), List.of(client));
+        }
     }
 }

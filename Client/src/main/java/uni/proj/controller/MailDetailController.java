@@ -1,5 +1,6 @@
 package uni.proj.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -7,14 +8,19 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.FlowPane;
 import uni.proj.model.Client;
+import uni.proj.model.ClientListener;
+import uni.proj.model.protocol.MessageType;
+import uni.proj.model.protocol.data.ErrorData;
+import uni.proj.model.protocol.data.ResponseData;
 import uni.proj.model.protocol.data.SendMailData;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class MailDetailController {
+public class MailDetailController implements ClientListener {
 
+    @FXML Button delete;
     @FXML private Label errorForwardLabel;
     @FXML private FlowPane emailContainer;
     @FXML private TextField emailInput;
@@ -34,6 +40,7 @@ public class MailDetailController {
     public void setData(SendMailData data, ClientController controller, Client client) {
         this.inboxController = controller;
         this.client = client;
+        client.registerListener(this);
         this.data = data;
         emailInput.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
@@ -54,7 +61,13 @@ public class MailDetailController {
 
     private Label createEmailPill(String email) {
         Label pill = new Label(email);
-        pill.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 5 10 5 10; -fx-background-radius: 20;");
+        pill.setStyle(
+                "-fx-background-color: #e0e0e0;" +
+                        " -fx-padding: 5 10 5 10;" +
+                        " -fx-background-radius: 20;" +
+                        " -fx-text-fill: #333333;"
+        );
+        System.out.println(pill.getStyleClass());
         pill.setCursor(Cursor.HAND);
         pill.setOnMouseClicked(event -> {
             emailContainer.getChildren().remove(pill);
@@ -65,7 +78,7 @@ public class MailDetailController {
 
     @FXML
     private void onBack() {
-        inboxController.backToInbox();
+        inboxController.backToInbox(this);
     }
 
     @FXML
@@ -96,12 +109,21 @@ public class MailDetailController {
 
         body = escapeQuotes(body.trim());
         String[] sendTo = Stream.concat(Stream.of(data.senderEmail()), Stream.of(data.receiversEmail())).distinct().toArray(String[]::new);
-        String command = "/sendmail \"" + data.title() + "\" \"" + body + "\"";
+        String command = "/sendmail \"" + escapeQuotes(data.title()) + "\" \"" + body + "\"";
         for(String s : sendTo) {
             command += " " + s;
         }
         client.execute(command);
         bodyField.clear();
+    }
+
+    @FXML
+    private void onDelete() {
+        String command = "/delete " + client.getLoggedMail() + " \"" + escapeQuotes(data.title()) + "\" \"" + escapeQuotes(data.body()) + "\"";
+        for(String receiver : data.receiversEmail()) {
+            command += " " + receiver;
+        }
+        client.execute(command);
     }
 
     @FXML
@@ -141,4 +163,19 @@ public class MailDetailController {
         return s.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
+    @Override
+    public void onResponse(ResponseData response) {
+        Platform.runLater(() -> {
+            if (response.responseTo().equals(MessageType.DELETE)) {
+                System.out.println("eseguo delete");
+                client.getMails().remove(data);
+                onBack();
+            }
+        });
+    }
+
+    @Override
+    public void onError(ErrorData error) {
+
+    }
 }

@@ -14,7 +14,10 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 public class ClientHandler implements Runnable {
 
@@ -194,9 +197,89 @@ public class ClientHandler implements Runnable {
                         return;
                     }
                 }
+                AtomicBoolean allDestinationsValid = new AtomicBoolean(true);
+                CountDownLatch latch = new CountDownLatch(1);
+
+                String[] users = Stream.concat(Stream.of(data.senderEmail()), Stream.of(data.receiversEmail())).distinct().toArray(String[]::new);
+
+                Platform.runLater(() -> {
+                    try {
+                        for (String dest : users) {
+                            boolean foundDes = server.getEmails().stream()
+                                    .anyMatch(reg -> reg.email().equalsIgnoreCase(dest));
+                            if (!foundDes) {
+                                allDestinationsValid.set(false);
+                                break;
+                            }
+                        }
+                    } finally {
+                        latch.countDown(); // Sblocca il thread chiamante
+                    }
+                });
+
+                try {
+                    latch.await(); // Aspetta che la verifica sia completata
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                if(!allDestinationsValid.get()) {
+                    server.getLogger().log(new Info("Email del destinatario non valida, operazione annullata"));
+                    server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData(MessageType.SEND_MAIL,"Destinatario non trovato")), List.of(this));
+                    return;
+                }
                 server.sendEmail(data);
                 server.getLogger().log(new Info("richiesta di Send Mail completata"));
                 server.send(new ProtocolMessage<>(MessageType.RESPONSE, new ResponseData(MessageType.SEND_MAIL, "Email inviata con successo")), List.of(this));
+            }
+            case DELETE -> {
+                DeleteData data = (DeleteData) message.data();
+                server.getLogger().log(new Message("Richiesta di Delete da " + clientSocket.getRemoteSocketAddress()));
+                if(this.loggedEmail == null) {
+                    server.getLogger().log(new Info("L'utente non e' ancora loggato, impossibile eliminare la mail"));
+                    server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData(MessageType.SEND_MAIL,"Il client deve prima essere loggato, operazione annullata")), List.of(this));
+                    return;
+                }
+                for(String email : data.mail().receiversEmail()) {
+                    if(!isValidEmail(email)) {
+                        server.getLogger().log(new Info("Email del destinatario non valida, operazione annullata: " + email));
+                        server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData(MessageType.SEND_MAIL,"Destinatario non trovato: "+email)), List.of(this));
+                        return;
+                    }
+                }
+
+                AtomicBoolean allDestinationsValid = new AtomicBoolean(true);
+                CountDownLatch latch = new CountDownLatch(1);
+
+                String[] users = Stream.concat(Stream.of(data.mail().senderEmail()), Stream.of(data.mail().receiversEmail())).distinct().toArray(String[]::new);
+
+                Platform.runLater(() -> {
+                    try {
+                        for (String dest : users) {
+                            boolean foundDes = server.getEmails().stream()
+                                    .anyMatch(reg -> reg.email().equalsIgnoreCase(dest));
+                            if (!foundDes) {
+                                allDestinationsValid.set(false);
+                                break;
+                            }
+                        }
+                    } finally {
+                        latch.countDown(); // Sblocca il thread chiamante
+                    }
+                });
+
+                try {
+                    latch.await(); // Aspetta che la verifica sia completata
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                if(!allDestinationsValid.get()) {
+                    server.getLogger().log(new Info("Email del destinatario non valida, operazione annullata"));
+                    server.send(new ProtocolMessage<>(MessageType.ERROR, new ErrorData(MessageType.DELETE,"Destinatario non trovato")), List.of(this));
+                    return;
+                }
+                server.deleteMail(data.mail(), this);
             }
             case GET_INBOX -> {
                 GetInboxData data = (GetInboxData) message.data();
@@ -250,6 +333,7 @@ public class ClientHandler implements Runnable {
     }
 
     public void send(String message) {
+        System.out.println("outgoing message: " +message);
         outgoingMessages.add(message);
     }
 

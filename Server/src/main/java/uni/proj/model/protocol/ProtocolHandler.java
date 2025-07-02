@@ -21,7 +21,8 @@ public class ProtocolHandler {
             SendMailData.class,
             ResponseData.class,
             GetInboxData.class,
-            ForwardData.class
+            ForwardData.class,
+            DeleteData.class
     );
 
     public String encode(ProtocolMessage<?> message, Class<?> dataClass) {
@@ -64,6 +65,7 @@ public class ProtocolHandler {
             case RESPONSE -> ResponseData.class;
             case GET_INBOX -> GetInboxData.class;
             case FORWARD -> ForwardData.class;
+            case DELETE -> DeleteData.class;
         };
     }
 

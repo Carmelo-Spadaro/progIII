@@ -33,7 +33,7 @@ public class Client implements Runnable {
     }
 
     private Socket socket;
-    private ClientListener listener;
+    private List<ClientListener> listeners = new ArrayList<>();
     private BufferedReader in;
     private PrintWriter out;
     private final BlockingQueue<String> outgoingMessages = new LinkedBlockingQueue<>();
@@ -131,7 +131,8 @@ public class Client implements Runnable {
                 System.out.println("messaggio dal server: "+data.message());
             }
             case RESPONSE -> {
-                listener.onResponse((ResponseData) message.data());
+                for(ClientListener listener : listeners)
+                    listener.onResponse((ResponseData) message.data());
                 ResponseData data = (ResponseData) message.data();
                 switch (data.responseTo()) {
                     case LOGIN -> setState(State.LOGGED);
@@ -142,8 +143,11 @@ public class Client implements Runnable {
                     case SEND_MAIL -> {
                         System.out.println(data.message());
                     }
-                    case CHAT, ERROR, RESPONSE, REGISTER -> {
+                    case CHAT, ERROR, RESPONSE, REGISTER, DELETE -> {
                         // ignora
+                    }
+                    case null -> {
+                        System.out.println("messaggio con type null");
                     }
                     default -> {
                         System.out.println("Risposta non riconosciuta");
@@ -151,15 +155,19 @@ public class Client implements Runnable {
                 }
             }
             case ERROR -> {
-                listener.onError((ErrorData) message.data());
+                for(ClientListener listener : listeners)
+                    listener.onError((ErrorData) message.data());
                 ErrorData data = (ErrorData) message.data();
-                switch (data.responseTo()) {
-                    case LOGOUT, CHAT, ERROR, RESPONSE, REGISTER, SEND_MAIL -> {
+                switch (data.errorTo()) {
+                    case LOGOUT, GET_INBOX, CHAT, DELETE, FORWARD, ERROR, RESPONSE, REGISTER, SEND_MAIL -> {
                         System.out.println(data.message());
                     }
                     case LOGIN -> {
                         System.out.println(data.message());
                         loggedMail = null;
+                    }
+                    case null -> {
+                        System.out.println("messaggio con type null");
                     }
                     default -> {
                         System.out.println("Risposta non riconosciuta");
@@ -238,8 +246,30 @@ public class Client implements Runnable {
                                     return false;
                                 }
                             }
-                            String[] recipients = commandQuery.subList(3, commandQuery.size()).toArray(new String[0]);
+                            String[] recipients = commandQuery.subList(3, commandQuery.size() ).toArray(new String[0]);
                             send(new ProtocolMessage<>(MessageType.SEND_MAIL, new SendMailData(loggedMail, commandQuery.get(1), commandQuery.get(2), recipients)));
+                            return true;
+                        } else {
+                            System.out.println("comando non valido");
+                            return false;
+                        }
+                    } else {
+                        System.out.println("comando non valido, devi essere loggato");
+                        return false;
+                    }
+                }
+                case "/delete" -> {
+                    if(loggedMail != null) {
+                        if(commandQuery.size() >= 5) {
+
+                            for(String email : commandQuery.subList(4, commandQuery.size()-1)) {
+                                if(!isValidEmail(email)) {
+                                    System.out.println("destinatario non valido " + email);
+                                    return false;
+                                }
+                            }
+                            String[] recipients = commandQuery.subList(4, commandQuery.size() ).toArray(new String[0]);
+                            send(new ProtocolMessage<>(MessageType.DELETE, new DeleteData(new SendMailData(commandQuery.get(1), commandQuery.get(2), commandQuery.get(3), recipients))));
                             return true;
                         } else {
                             System.out.println("comando non valido");
@@ -337,8 +367,16 @@ public class Client implements Runnable {
         }
     }
 
-    public void setListener(ClientListener listener) {
-        this.listener = listener;
+    public void registerListener(ClientListener listener) {
+        listeners.add(listener);
+    }
+
+    public void removeListener(ClientListener listener) {
+        listeners.remove(listener);
+    }
+
+    public List<ClientListener> getListeners() {
+        return listeners;
     }
 
     private void setState(State newState) {
@@ -376,6 +414,10 @@ public class Client implements Runnable {
 
     public ObservableList<SendMailData> getMails() {
         return mails;
+    }
+
+    public String getLoggedMail() {
+        return loggedMail;
     }
 
     private boolean isValidEmail(String email) {

@@ -3,6 +3,8 @@ package uni.proj.model.protocol.data;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public record SendMailData(String senderEmail, String title, String body, String[] receiversEmail) {
@@ -13,14 +15,16 @@ public record SendMailData(String senderEmail, String title, String body, String
         return senderEmail.equals(that.senderEmail)
                 && title.equals(that.title)
                 && body.equals(that.body)
-                && Arrays.equals(receiversEmail, that.receiversEmail);
+                && emailsSameWithCounts(receiversEmail, that.receiversEmail);
     }
 
-    @Override
-    public int hashCode() {
-        int result = Objects.hash(senderEmail, title, body);
-        result = 31 * result + Arrays.hashCode(receiversEmail);
-        return result;
+    private boolean emailsSameWithCounts(String[] a, String[] b) {
+        if (a.length != b.length) return false;
+        Map<String, Integer> countA = new HashMap<>();
+        for (String s : a) countA.merge(s, 1, Integer::sum);
+        Map<String, Integer> countB = new HashMap<>();
+        for (String s : b) countB.merge(s, 1, Integer::sum);
+        return countA.equals(countB);
     }
 
     @NotNull

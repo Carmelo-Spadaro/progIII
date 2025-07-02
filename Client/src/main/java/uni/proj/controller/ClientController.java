@@ -54,7 +54,7 @@ public class ClientController implements Initializable, ClientListener {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         client = new Client();
-        client.setListener(this);
+        client.registerListener(this);
         mails = client.getMails();
         mailList.setCellFactory(list -> new MailItemCell(this));
         mailList.setItems(mails);
@@ -102,7 +102,14 @@ public class ClientController implements Initializable, ClientListener {
                     client.execute("/getinbox");
                 }
                 case LOGOUT -> {
-                    backToInbox();
+                    if(client.getListeners().size() > 1) {
+                        for(ClientListener listener : client.getListeners()) {
+                            if(listener.equals(this))
+                                continue;
+                            client.removeListener(listener);
+                        }
+                    }
+                    backToInbox(null);
                     login.setVisible(true);
                     login.setManaged(true);
                     logout.setVisible(false);
@@ -131,7 +138,13 @@ public class ClientController implements Initializable, ClientListener {
 
     private Label createEmailPill(String email) {
         Label pill = new Label(email);
-        pill.setStyle("-fx-background-color: #e0e0e0; -fx-padding: 5 10 5 10; -fx-background-radius: 20;");
+        pill.setStyle(
+                "-fx-background-color: #e0e0e0;" +
+                        " -fx-padding: 5 10 5 10;" +
+                        " -fx-background-radius: 20;" +
+                        " -fx-text-fill: #333333;"
+        );
+        System.out.println(pill.getStyleClass());
         pill.setCursor(Cursor.HAND);
         pill.setOnMouseClicked(event -> {
             emailContainer.getChildren().remove(pill);
@@ -239,11 +252,14 @@ public class ClientController implements Initializable, ClientListener {
         }
     }
 
-    public void backToInbox() {
+    public void backToInbox(ClientListener listener) {
         if (mainStack.getChildren().size() > 1) {
             mainStack.getChildren().removeLast();
             main.setVisible(true);
             main.setManaged(true);
+            if(listener != null) {
+                client.removeListener(listener);
+            }
         }
     }
 }

@@ -91,6 +91,36 @@
     -fx-background-color: #b71c1c;
 }
 
+.mail-item-cell {
+    -fx-background-color: #222222;
+    -fx-padding: 10;
+    -fx-background-radius: 5;
+}
+
+.mail-item-cell > VBox > Label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.mail-item-cell > VBox > Label#senderLabel {
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.mail-item-cell > VBox > Label#titleLabel {
+    -fx-font-style: italic;
+    -fx-text-fill: #bbbbbb;
+}
+
+.mail-item-cell > VBox > Label#receiversLabel {
+    -fx-font-size: 10;
+    -fx-text-fill: #999999;
+}
+
+.mail-item-cell > VBox > Text#bodyPreview {
+    -fx-fill: #dddddd;
+}
+
+
 /* TEXTFIELD */
 .text-field {
     -fx-background-color: #2c2c2c;
